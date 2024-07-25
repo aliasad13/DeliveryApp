@@ -9,7 +9,9 @@ const StyledTextInput = ({
                              icon,
                              keyboardType,
                              prefix,
-                             prefixImage
+                             prefixImage,
+                             value,  // Add this
+                             onChangeText  // Add this
                          }) => {
     const [isFocused, setIsFocused] = useState(false);
 
@@ -34,6 +36,8 @@ const StyledTextInput = ({
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 keyboardType={keyboardType}
+                value={value}  // Add this
+                onChangeText={onChangeText}  // Add this
             />
         </View>
     );
@@ -103,12 +107,12 @@ const styles = StyleSheet.create({
 
     },
     userIcon: {
-        top: 9,
+        top: 19,
         left: 9
     },
 
     lockIcon: {
-        top: 9,
+        top: 19,
         left: 9
     },
 
