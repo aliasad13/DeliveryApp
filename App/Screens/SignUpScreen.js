@@ -61,7 +61,7 @@ function SignUpScreen({navigation}) {
         try {
             const response = await register(username, email, password, confirmPassword);
             console.log('User registered successfully:', response);
-            navigation.replace('SuccessScreen');
+            navigation.replace('HomeScreen');
         } catch (error) {
             console.log('Error caught:', error);
             if (Array.isArray(error)) {

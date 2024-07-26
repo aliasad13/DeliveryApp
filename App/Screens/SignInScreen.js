@@ -26,7 +26,11 @@ import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import {login} from "../../utils/https";
 // import ResetPassword from "./ResetPassword";
-import SuccessScreen from "./SuccessScreen";
+import HomeScreen from "./HomeScreen";
+import {connect, useDispatch, useSelector} from "react-redux";
+import {setIsFirstTimeUse, setIsFirstTimeUseTrue, setToken} from '../../src/actions/GeneralAction';
+import StorageService from "../../services/StorageService";
+
 
 
 function SignInScreen({navigation}) {
@@ -41,7 +45,6 @@ function SignInScreen({navigation}) {
 
 
 
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
     const [errorMessages, setErrorMessages] = useState([]);
@@ -50,14 +53,35 @@ function SignInScreen({navigation}) {
   const changeSignInClicked = () => {
       setSignInClicked(!signInClicked)
   }
+    const dispatch = useDispatch()
+
+
+    const makeFirstTimeUse = () => {
+        StorageService.setFirstTimeUseTrue().then(() => {
+            dispatch(setIsFirstTimeUseTrue())
+        })
+    }
+
     const handleLogin = async () => {
         setSignInClicked(true);
         setErrorMessages([]);
         try {
             const response = await login(email, password);
             console.log('Login successful:', response);
+            const existingToken = await SecureStore.getItemAsync('token');
+            console.log('seure store token:', existingToken);
+
+
+            if (response){
+                StorageService.setUserToken(response["token"]).then(() => {
+                    console.log('response["token"]', response["token"]);
+
+                    dispatch(setToken(response["token"]))
+                });
+            }
+
             // Handle successful login (e.g., navigate to home screen)
-            navigation.replace('SuccessScreen'); // Adjust based on your navigation setup
+             // Adjust based on your navigation setup
         } catch (error) {
             console.error('Login failed:', error);
             setErrorMessages(Array.isArray(error) ? error : [error.toString()]);
@@ -86,10 +110,9 @@ function SignInScreen({navigation}) {
 
     useEffect(() => {
         const checkLoginStatus = async () => {
-            const userToken = await SecureStore.getItemAsync('userToken');
+            const userToken = await SecureStore.getItemAsync('token');
             if (userToken) {
                 // User is already logged in
-                navigation.replace('SuccessScreen'); // Adjust based on your navigation setup
             }
         };
 
@@ -191,6 +214,16 @@ return(
               </TouchableOpacity>
           </View>
 
+          <Separator/>
+
+          <View >
+              <TouchableOpacity style={styles.signIn} onPress={makeFirstTimeUse} disabled={signInClicked}>
+                  <Text style={styles.signInText}>
+                      {signInClicked ? <ActivityIndicator color={"white"}/> : "First time login"}
+                  </Text>
+              </TouchableOpacity>
+          </View>
+
 
 
 
@@ -233,8 +266,12 @@ return(
   </SafeAreaView>
 )
 }
+// const mapDispatchToProps = (dispatch) => ({
+//     setToken: (token) => dispatch(setToken(token))
+// });
 
-export default SignInScreen
+
+export default SignInScreen;
 
 const styles = StyleSheet.create({
   container: {

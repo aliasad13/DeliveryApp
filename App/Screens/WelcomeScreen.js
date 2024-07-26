@@ -5,6 +5,11 @@ import {setWidth} from "../../utils/Display";
 import {useFonts} from "expo-font";
 import {useRef, useState} from "react";
 import {Colors} from "../../constants/Colors";
+import * as SecureStore from 'expo-secure-store';
+import StorageService from "../../services/StorageService";
+import {useDispatch} from "react-redux";
+import {setIsFirstTimeUse} from "../../src/actions/GeneralAction";
+
 
 const pageIndicatorColor = (isActive) => isActive ? styles.page : {...styles.page, backgroundColor: Colors.colors.DEFAULT_GREY}
 const Pagination = ({index}) => {
@@ -19,10 +24,18 @@ const Pagination = ({index}) => {
     )
 }
 
+async function a(){
+    const existingToken = await SecureStore.getItemAsync('token');
+    console.log('secure store token welcome:', existingToken);
+}
+
 function renderWelcomeCard(itemData){
+
     return <WelcomeCard {...itemData.item} />
 }
 function WelcomeScreen({navigation}) {
+
+
     const [welcomeListIndex, setWelcomeListIndex] = useState(0);  // setting index to each page
     const welcomeList = useRef();
     const onViewRef = useRef(({changed}) => {  // changed is the page to which we have changed
@@ -35,11 +48,20 @@ function WelcomeScreen({navigation}) {
             index: welcomeListIndex < 2 ? welcomeListIndex + 1 : welcomeListIndex
         })
     }
+
+    const dispatch = useDispatch()
+
+    const navigate = () => {
+        StorageService.setFirstTimeUse().then(() => {
+            dispatch(setIsFirstTimeUse(false))
+        })
+
+    }
     const skipPage = () => {
         welcomeList.current.scrollToEnd()
     }
     function getStartedPressHandler(){
-        navigation.replace('SignInScreen')
+        navigate();
     }
 
 
@@ -72,7 +94,7 @@ return(
         { welcomeListIndex === 2 ? (
             <TouchableOpacity
                 style={styles.gettingStartedButton}
-                onPress={getStartedPressHandler}
+                onPress={() => navigate()}
             >
                 <Text style={styles.gettingStartedText}>Get Started</Text>
             </TouchableOpacity>) : (

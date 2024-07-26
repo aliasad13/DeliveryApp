@@ -1,6 +1,13 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
+// import * as SecureStore from 'expo-secure-store' and const token = await SecureStore.getItemAsync('userToken');,
+// I will get the user authentication token if there is one
+
+// SecureStore.setItemAsync('userToken') will store the auth token under the key 'userToken' in the device's secure storage.
+// SecureStore.getItemAsync('userToken') will attempt to retrieve the value stored under the key 'userToken' from the device's secure storage.
+// this is a secure storage used to store the private info while redux is a app wide state management.
+
 const BACKEND_URL = 'http://192.168.20.2:3001';
 
 // Create an axios instance
@@ -11,7 +18,7 @@ const api = axios.create({
 // Add a request interceptor
 api.interceptors.request.use(
     async (config) => {
-        const token = await SecureStore.getItemAsync('userToken');
+        const token = await SecureStore.getItemAsync('token');
         if (token) {
             config.headers['Authorization'] = 'Bearer ' + token;
         }
@@ -42,7 +49,7 @@ api.interceptors.response.use(
                 const refreshToken = await SecureStore.getItemAsync('refreshToken');
                 const res = await axios.post(`${BACKEND_URL}/refresh`, { refreshToken });
                 if (res.status === 200) {
-                    await SecureStore.setItemAsync('userToken', res.data.token);
+                    await SecureStore.setItemAsync('token', res.data.token);
                     axios.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.token;
                     return api(originalRequest);
                 }
@@ -80,7 +87,7 @@ export async function register(username, email, password, password_confirmation)
 export async function login(email, password) {
     try {
         const response = await api.post('/login', { email, password });
-        await SecureStore.setItemAsync('userToken', response.data.token);
+        await SecureStore.setItemAsync('token', response.data.token);
         return response.data;
     } catch (error) {
         console.error('Login failed:', error.response?.status, error.response?.data);
@@ -94,7 +101,7 @@ export async function login(email, password) {
 
 export async function logout() {
     try {
-        await SecureStore.deleteItemAsync('userToken');
+        await SecureStore.deleteItemAsync('token');
         } catch (error) {
         console.error('Error during logout:', error);
     }

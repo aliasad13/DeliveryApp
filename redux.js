@@ -6,6 +6,7 @@ const redux = require("redux");
 // adding into to the state/array, removing from the state as demanded by the action type
 // and returns the new state
 
+// reducer must always return a immutable array, so we cannot mutate it. so we should not use functions like push, pop, unshift, shift, ... in reducer
 const reducer1 = (state = [], action) => {
     switch (action.type) {
         case 'ADD_ITEM':

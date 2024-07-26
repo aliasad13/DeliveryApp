@@ -1,0 +1,82 @@
+import WelcomeScreen from "../App/Screens/WelcomeScreen";
+import SignInScreen from "../App/Screens/SignInScreen";
+import SplashScreen from '../App/Screens/SplashScreen'
+import SignUpScreen from "../App/Screens/SignUpScreen";
+import HomeScreen from "../App/Screens/HomeScreen";
+import {NavigationContainer} from "@react-navigation/native";
+import {createNativeStackNavigator} from "@react-navigation/native-stack";
+import {StyleSheet} from "react-native";
+import {Colors} from "../constants/Colors";
+import { useSelector, useDispatch} from "react-redux";
+import {useEffect} from "react";
+import {appStart} from "../src/actions/GeneralAction";
+
+
+const Stack = createNativeStackNavigator();
+
+function Navigators(){
+
+    const {isAppLoading, token, isFirstTimeUse} = useSelector(state => state?.generalState)
+    const dispatch = useDispatch();
+
+    console.log("isApploading", isAppLoading)
+    console.log("isFirstTimeUse", isFirstTimeUse)
+    console.log("token",token)
+    useEffect(() => {
+        dispatch(appStart())
+    }, []);
+
+
+
+    console.log("token: ", token)
+    return(
+        <NavigationContainer>
+            <Stack.Navigator
+                screenOptions={{
+                    headerShown: false,
+                    contentStyle: styles.contentStyle
+                }}>
+                {isAppLoading ?
+                    <Stack.Screen name="SplashScreen" component={SplashScreen} />
+                    : !token ?
+                        <>
+                            {isFirstTimeUse && (
+                    <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
+                            )}
+                        <Stack.Screen name="SignInScreen" component={SignInScreen} />
+                        <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
+                    </>
+                    :
+                    <Stack.Screen name="HomeScreen" component={HomeScreen} />
+
+                }
+
+            </Stack.Navigator>
+        </NavigationContainer>
+    )
+
+}
+
+// const mapStateToProps = (state) => {
+//     return{
+//         token: state.generalState.token
+//     }
+// }
+
+export default Navigators; //connect() returns a function that takes one argument
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignContent: 'center',
+    },
+    contentStyle: {
+        backgroundColor: Colors.colors.DEFAULT_WHITE,
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    }
+});
