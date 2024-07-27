@@ -2,7 +2,8 @@ import StorageService from "../../services/StorageService";
 
 const types = {
     SET_IS_APP_LOADING: 'SET_IS_APP_LOADING',
-    SET_TOKEN: 'SET_TOKEN',
+    SET_ACCESS_TOKEN: 'SET_ACCESS_TOKEN',
+    SET_REFRESH_TOKEN: 'SET_REFRESH_TOKEN',
     REMOVE_TOKEN: 'REMOVE_TOKEN',
     SET_FIRST_TIME_USE: 'SET_FIRST_TIME_USE'
 }
@@ -14,9 +15,16 @@ const setIsAppLoading = (isAppLoading) => {
     };
 }
 
-const setToken = (token) => {
+const setAccessToken = (token) => {
     return {
-        type: types.SET_TOKEN,
+        type: types.SET_ACCESS_TOKEN,
+        payload: token
+    };
+}
+
+const setRefreshToken = (token) => {
+    return {
+        type: types.SET_REFRESH_TOKEN,
         payload: token
     };
 }
@@ -39,9 +47,10 @@ const appStart = () => {
     return async (dispatch, getState) => {
         try {
             // Use Promise.all to wait for both async operations to complete
-            const [isFirstTimeUse, token] = await Promise.all([
+            const [isFirstTimeUse, accessToken, refreshToken] = await Promise.all([
                 StorageService.getFirstTimeUse(),
-                StorageService.getUserToken()
+                StorageService.getUserAccessToken(),
+                StorageService.getUserRefreshToken()
             ]);
 
             const isActuallyFirstTimeUse = isFirstTimeUse === null || isFirstTimeUse === undefined;
@@ -50,10 +59,17 @@ const appStart = () => {
                 payload: isActuallyFirstTimeUse
             });
 
-            if (token) {
+            if (accessToken) {
                 dispatch({
-                    type: types.SET_TOKEN,
-                    payload: token
+                    type: types.SET_ACCESS_TOKEN,
+                    payload: accessToken
+                });
+            }
+
+            if (refreshToken) {
+                dispatch({
+                    type: types.SET_REFRESH_TOKEN,
+                    payload: refreshToken
                 });
             }
 
@@ -74,4 +90,4 @@ const appStart = () => {
 }
 
 
-export { setIsAppLoading, setToken, types, appStart, setIsFirstTimeUse, removeToken };
+export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken };

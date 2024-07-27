@@ -28,7 +28,7 @@ import {login} from "../../utils/https";
 // import ResetPassword from "./ResetPassword";
 import HomeScreen from "./HomeScreen";
 import {connect, useDispatch, useSelector} from "react-redux";
-import {setIsFirstTimeUse, setToken} from '../../src/actions/GeneralAction';
+import {setAccessToken, setIsFirstTimeUse, setRefreshToken} from '../../src/actions/GeneralAction';
 import StorageService from "../../services/StorageService";
 
 
@@ -67,12 +67,14 @@ function SignInScreen({navigation}) {
         setErrorMessages([]);
         try {
             const response = await login(email, password);
-            const existingToken = await SecureStore.getItemAsync('token');
-            console.log("Response Data: ", response.data);
 
             if (response){
-                StorageService.setUserToken(response.accessToken).then(() => {
-                    dispatch(setToken(response.accessToken))
+                StorageService.setUserAccessToken(response.accessToken).then(() => {
+                    dispatch(setAccessToken(response.accessToken))
+                });
+
+                StorageService.setUserRefreshToken(response.refreshToken).then(() => {
+                    dispatch(setRefreshToken(response.refreshToken))
                 });
             }
 

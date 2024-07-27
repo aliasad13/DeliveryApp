@@ -22,9 +22,9 @@ const setFirstTimeUse = async () => {
     }
 };
 
-const getUserToken = async () => {
+const getUserAccessToken = async () => {
     try {
-        const token = await SecureStore.getItemAsync('token');
+        const token = await SecureStore.getItemAsync('accessToken');
         return token;
     } catch (error) {
         console.error('Error getting user token:', error);
@@ -32,9 +32,31 @@ const getUserToken = async () => {
     }
 };
 
-const setUserToken = async (token) => {
+const getUserRefreshToken = async () => {
     try {
-        await SecureStore.setItemAsync('token', token);
+        const token = await SecureStore.getItemAsync('refreshToken');
+        return token;
+    } catch (error) {
+        console.error('Error getting user token:', error);
+        return null;
+    }
+};
+
+const setUserAccessToken = async (token) => {
+    console.log('setUserAccessToken', token)
+
+    try {
+        await SecureStore.setItemAsync('accessToken', token);
+    } catch (error) {
+        console.error('Error setting user token:', error);
+    }
+};
+
+const setUserRefreshToken = async (token) => {
+    console.log('setUserRefreshToken', token)
+
+    try {
+        await SecureStore.setItemAsync('refreshToken', token);
     } catch (error) {
         console.error('Error setting user token:', error);
     }
@@ -42,10 +64,11 @@ const setUserToken = async (token) => {
 
 export const removeUserToken = async () => {
     try {
-        await SecureStore.deleteItemAsync('token');
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
     } catch (error) {
         console.error('Error removing user token:', error);
     }
 };
 
-export default {getUserToken, getFirstTimeUse, setFirstTimeUse, setUserToken, removeUserToken}
+export default {getUserAccessToken, setUserRefreshToken, getUserRefreshToken, getFirstTimeUse, setFirstTimeUse, setUserAccessToken, removeUserToken}

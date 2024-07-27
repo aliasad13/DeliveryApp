@@ -16,7 +16,7 @@ import * as SplashScreen from 'expo-splash-screen';
 const Stack = createNativeStackNavigator();
 
 function Navigators() {
-    const {isAppLoading, token, isFirstTimeUse} = useSelector(state => state?.generalState)
+    const {isAppLoading, accessToken, isFirstTimeUse} = useSelector(state => state?.generalState)
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -34,7 +34,7 @@ function Navigators() {
                     headerShown: false,
                     contentStyle: styles.contentStyle
                 }}>
-                {!token ? (
+                {!accessToken ? (
                     <>
                         {isFirstTimeUse && (
                             <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
