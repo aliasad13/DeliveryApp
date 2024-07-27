@@ -1,12 +1,13 @@
 import React from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {fetchUserData, logout} from '../../utils/https'; // Adjust the import path as needed
+ // Adjust the import path as needed
 import {removeToken, setToken} from '../../src/actions/GeneralAction';
 import {connect} from "react-redux";
 import StorageService, {removeUserToken} from "../../services/StorageService";
 import {useDispatch} from "react-redux";
 import Separator from "../../components/Separator";
+import {getUserData} from "../../utils/https";
 
 function HomeScreen() {
 
@@ -19,7 +20,7 @@ function HomeScreen() {
     };
 
     const getUserInfo = async () => {
-        const response = await fetchUserData()
+        const response = await getUserData()
         console.log("userInfo", response)
     }
 

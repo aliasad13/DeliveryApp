@@ -6,7 +6,8 @@ const initialState = {
     isAppLoading: true,
     accessToken: '', //token needed to be added in state management because its ued in every transaction
     refreshToken: '', //token needed to be added in state management because its ued in every transaction
-    isFirstTimeUse: true
+    isFirstTimeUse: true,
+    userData: {}
 }
 
 const GeneralReducer = (state = initialState, action) => {
@@ -20,13 +21,12 @@ const GeneralReducer = (state = initialState, action) => {
         case types.SET_FIRST_TIME_USE:
             return {...state, isFirstTimeUse: action.payload};
         case types.REMOVE_FIRST_TIME_USE:
-
             const newState =  omit(state, 'isFirstTimeUse');
-            console.log('REMOVE_FIRST_TIME_USE', newState)
             return newState
-
         case types.REMOVE_TOKEN:
             return {...state, accessToken: '', refreshToken: ''};
+        case types.SET_USER_DATA:
+            return {...state, userData: action.payload};
         default:
             return state;
     }

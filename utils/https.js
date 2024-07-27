@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import {getAccessTokenFromStore, getRefreshTokenFromStore} from "../src/Store";
+// import { Store, getAccessTokenFromStore, getRefreshTokenFromStore } from "../src/Store";
 
 const getAccessToken = async () => {
     return await SecureStore.getItemAsync('accessToken');
@@ -11,9 +11,14 @@ async function getRefreshToken() {
 }
 
 const BACKEND_URL = 'http://192.168.20.2:3001';
-const accessToken = getAccessTokenFromStore() ;//|| await getAccessToken();
-const refreshToken = getRefreshTokenFromStore();// || getRefreshToken();
-//Function to get token from redux state store => since its not a async storage we can get it without delay due to async requests
+const accessToken = async () => {
+    return await SecureStore.getItemAsync('accessToken');
+}
+const refreshToken = async () => {
+    return await SecureStore.getItemAsync('refreshToken');
+}
+
+//Function to get token from redux state => since its not a async storage we can get it without delay due to async requests
 //if we want both conditions we can use the below method
 
 // const getAccessTokenFromBothSources = async () => {
@@ -41,15 +46,23 @@ const api = axios.create({
 
 
 // Function to refresh tokens
-async function refreshTokens() {
+export async function refreshTokens() {
     try {
         const response = await axios.post(`${BACKEND_URL}/refresh`, {}, {
             headers: {
                 'Authorization': `Bearer ${refreshToken}`
             }
         });
-        await SecureStore.setItemAsync('accessToken', response.data.accessToken);
-        await SecureStore.setItemAsync('refreshToken', response.data.refreshToken);
+
+        console.log('----------------------RefreshTokenResponse--------------------------:', response?.data)
+        // When you refresh the token in https.js, you should indeed update both the
+        // SecureStore and the Redux state. in appStart we are updating the state with tokens from the secureStore,
+        // but appStart() only runs when the app initializes, so it won't catch token updates that
+        // happen during the app's lifecycle.
+
+        // update redux state and secure store with the new tokens
+
+
         return response.data.accessToken;
     } catch (error) {
         console.error("Token refresh failed: ", error.response);
@@ -126,8 +139,7 @@ export async function login(email, password) {
 }
 
 
-// User Service
-export async function fetchUserData() {
+export const getUserData = async () => {
     try {
         const response = await api.get('/user');
         return response.data;
@@ -139,5 +151,14 @@ export async function fetchUserData() {
         }
     }
 };
+// User Service
 
 
+//my doubt is that we are refreshing the token when the access token is invalid in https.js, so when we are refreshing
+// the token, should we update the token in state also or will it get updated by appStart() ?
+//
+// Great question! Your setup is good, but there are a few considerations to make it more robust:
+//
+// Updating tokens after refresh: When you refresh the token in https.js, you should indeed update both the
+// SecureStore and the Redux state. appStart() only runs when the app initializes, so it won't catch token updates that
+// happen during the app's lifecycle.

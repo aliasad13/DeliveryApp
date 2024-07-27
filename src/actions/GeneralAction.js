@@ -1,5 +1,6 @@
 import StorageService from "../../services/StorageService";
 import * as SecureStore from "expo-secure-store";
+import userService, {fetchUserData} from '../../services/userService'
 
 const types = {
     SET_IS_APP_LOADING: 'SET_IS_APP_LOADING',
@@ -7,7 +8,8 @@ const types = {
     SET_REFRESH_TOKEN: 'SET_REFRESH_TOKEN',
     REMOVE_TOKEN: 'REMOVE_TOKEN',
     SET_FIRST_TIME_USE: 'SET_FIRST_TIME_USE',
-    REMOVE_FIRST_TIME_USE: 'REMOVE_FIRST_TIME_USE'
+    REMOVE_FIRST_TIME_USE: 'REMOVE_FIRST_TIME_USE',
+    SET_USER_DATA: 'SET_USER_DATA'
 }
 
 const setIsAppLoading = (isAppLoading) => {
@@ -52,18 +54,23 @@ const removeIsFirstTimeUse = () => {
 
 
 const appStart = () => {
+    console.log('----------------------------inside appStart--------------------------------')
     return async (dispatch, getState) => {
         try {
             // Use Promise.all to wait for both async operations to complete
-            const [isFirstTimeUse, accessToken, refreshToken] = await Promise.all([
+            const [isFirstTimeUse, accessToken, refreshToken, userInfo] = await Promise.all([
                 StorageService.getFirstTimeUse(),
                 StorageService.getUserAccessToken(),
-                StorageService.getUserRefreshToken()
+                StorageService.getUserRefreshToken(),
+                userService.fetchUserData()
             ]);
-            const a = await SecureStore.getItemAsync('accessToken');
+            // const userInfo = await fetchUserData()
+            // const a = await SecureStore.getItemAsync('accessToken');
+
+
+
 
             const isActuallyFirstTimeUse = isFirstTimeUse === null || isFirstTimeUse === undefined;
-
             dispatch({
                 type: types.SET_FIRST_TIME_USE,
                 payload: isActuallyFirstTimeUse
@@ -83,11 +90,20 @@ const appStart = () => {
                 });
             }
 
+            if(userInfo){
+                console.log(userInfo)
+                dispatch({
+                    type: types.SET_USER_DATA,
+                    payload: userInfo
+                })
+                dispatch({
+                    type: types.SET_IS_APP_LOADING,
+                    payload: false
+                });
+            }
+
             // Set isAppLoading to false only after all other states are updated
-            dispatch({
-                type: types.SET_IS_APP_LOADING,
-                payload: false
-            });
+
         } catch (error) {
             console.error("Error in appStart:", error);
             // Ensure isAppLoading is set to false even if there's an error
