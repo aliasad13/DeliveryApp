@@ -28,7 +28,7 @@ import {login} from "../../utils/https";
 // import ResetPassword from "./ResetPassword";
 import HomeScreen from "./HomeScreen";
 import {connect, useDispatch, useSelector} from "react-redux";
-import {setIsFirstTimeUse, setIsFirstTimeUseTrue, setToken} from '../../src/actions/GeneralAction';
+import {setIsFirstTimeUse, setToken} from '../../src/actions/GeneralAction';
 import StorageService from "../../services/StorageService";
 
 
@@ -56,11 +56,11 @@ function SignInScreen({navigation}) {
     const dispatch = useDispatch()
 
 
-    const makeFirstTimeUse = () => {
-        StorageService.setFirstTimeUseTrue().then(() => {
-            dispatch(setIsFirstTimeUseTrue())
-        })
-    }
+    // const makeFirstTimeUseTrue = () => {
+    //     StorageService.setFirstTimeUse().then(() => {
+    //         dispatch(setIsFirstTimeUse())
+    //     })
+    // }
 
     const handleLogin = async () => {
         setSignInClicked(true);
@@ -216,13 +216,13 @@ return(
 
           <Separator/>
 
-          <View >
-              <TouchableOpacity style={styles.signIn} onPress={makeFirstTimeUse} disabled={signInClicked}>
-                  <Text style={styles.signInText}>
-                      {signInClicked ? <ActivityIndicator color={"white"}/> : "First time login"}
-                  </Text>
-              </TouchableOpacity>
-          </View>
+          {/*<View >*/}
+          {/*    <TouchableOpacity style={styles.signIn} onPress={makeFirstTimeUseTrue} disabled={signInClicked}>*/}
+          {/*        <Text style={styles.signInText}>*/}
+          {/*            {signInClicked ? <ActivityIndicator color={"white"}/> : "First time login"}*/}
+          {/*        </Text>*/}
+          {/*    </TouchableOpacity>*/}
+          {/*</View>*/}
 
 
 

@@ -15,7 +15,6 @@ const setIsAppLoading = (isAppLoading) => {
 }
 
 const setToken = (token) => {
-    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',token)
     return {
         type: types.SET_TOKEN,
         payload: token
@@ -28,43 +27,51 @@ const removeToken = () => {
     };
 }
 
-const setIsFirstTimeUse = (isFirstTimeUse) => {
-    console.log('isfirstlogin action parameter', isFirstTimeUse)
+const setIsFirstTimeUse = () => {
     return {
         type: types.SET_FIRST_TIME_USE,
-        payload: isFirstTimeUse
+        payload: false
     };
 }
 
 
 const appStart = () => {
-    return(dispatch, getState) => { // this is the structure of action if we are using thunk
+    return async (dispatch, getState) => {
+        try {
+            // Use Promise.all to wait for both async operations to complete
+            const [isFirstTimeUse, token] = await Promise.all([
+                StorageService.getFirstTimeUse(),
+                StorageService.getUserToken()
+            ]);
 
-        StorageService.getFirstTimeUse().then(isFirstTimeUse => {
-            console.log("appStart.isFirstTimeUse-----------------------", isFirstTimeUse)
+            const isActuallyFirstTimeUse = isFirstTimeUse === null || isFirstTimeUse === undefined;
             dispatch({
                 type: types.SET_FIRST_TIME_USE,
-                payload: isFirstTimeUse == false ? false : true // if ther is anything inside isFirstTimeUse, then its not fist time use
-            })
-        })
+                payload: isActuallyFirstTimeUse
+            });
 
-        StorageService.getUserToken().then(token => {
-            if(token){
-               dispatch({
-                   type: types.SET_TOKEN,
-                   payload: token
-               });
+            if (token) {
+                dispatch({
+                    type: types.SET_TOKEN,
+                    payload: token
+                });
             }
-        })
 
-
-        dispatch({
-            type: types.SET_IS_APP_LOADING,
-            payload: false
-        })
-
+            // Set isAppLoading to false only after all other states are updated
+            dispatch({
+                type: types.SET_IS_APP_LOADING,
+                payload: false
+            });
+        } catch (error) {
+            console.error("Error in appStart:", error);
+            // Ensure isAppLoading is set to false even if there's an error
+            dispatch({
+                type: types.SET_IS_APP_LOADING,
+                payload: false
+            });
+        }
     }
 }
 
 
-export { setIsAppLoading, setToken, types, appStart, setIsFirstTimeUse,removeToken };
+export { setIsAppLoading, setToken, types, appStart, setIsFirstTimeUse, removeToken };

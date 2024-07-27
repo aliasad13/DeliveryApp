@@ -53,7 +53,7 @@ function WelcomeScreen({navigation}) {
 
     const navigate = () => {
         StorageService.setFirstTimeUse().then(() => {
-            dispatch(setIsFirstTimeUse(false))
+            dispatch(setIsFirstTimeUse())
         })
 
     }

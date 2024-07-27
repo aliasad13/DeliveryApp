@@ -13,6 +13,10 @@ const getFirstTimeUse = async () => {
 const setFirstTimeUse = async () => {
     try {
         await SecureStore.setItemAsync('isFirstTimeUse', 'false');
+        // initially in SecureStore, there wont be any value for isFirstTimeUse.
+        // On clicking get started we add a value.
+        // then in appStart we check if there is value for isFirstTimeUse in SecureStore.
+        // this is used to display or hide welcome screen
     } catch (error) {
         console.error('Error setting not first time user:', error);
     }
