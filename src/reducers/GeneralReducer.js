@@ -7,14 +7,12 @@ const initialState = {
 }
 
 const GeneralReducer = (state = initialState, action) => {
-    console.log("generalReducer", "state: ",state , "action: ", action)
     switch(action.type) {
         case types.SET_IS_APP_LOADING:
             return {...state, isAppLoading: action.payload};
         case types.SET_TOKEN:
             return {...state, token: action.payload};
         case types.SET_FIRST_TIME_USE:
-            console.log("generalReducer", "state: ",state , "action.payload: ", action.payload)
             return {...state, isFirstTimeUse: action.payload};
         case types.REMOVE_TOKEN:
             return {...state, token: ''};

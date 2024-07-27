@@ -7,16 +7,11 @@ import Store from './src/Store'
 import React, { useEffect, useState, useCallback } from 'react';
 import { View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
-import * as SecureStore from 'expo-secure-store';
 import Navigators from "./components/Navigators";
-import { setToken } from './src/actions/GeneralAction';
-import StorageService from "./services/StorageService"; // Adjust the import path as needed
 
 // Keep the splash screen visible while we fetch resources
 
 export default function App() {
-  console.log("initial getFirstTimeUse", StorageService.getFirstTimeUse())
-  const [appIsReady, setAppIsReady] = useState(false);
 
   const [fontsLoaded, fontError] = useFonts({
     'astrix': require('./assets/Fonts/Asterix.ttf'),
@@ -28,38 +23,16 @@ export default function App() {
     'rubik-Regular': require('./assets/Fonts/Rubik-Regular.ttf'),
   });
 
-  useEffect(() => {
-    async function prepare() {
-      try {
-        // Check for token in SecureStore
-        const token = await SecureStore.getItemAsync('userToken');
-        if (token) {
-          // If token exists, dispatch action to set it in Redux store
-          Store.dispatch(setToken(token));
-        }
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        // Tell the application to render
-        setAppIsReady(true);
-      }
-    }
-
-    prepare();
-  }, []);
-
   const onLayoutRootView = useCallback(async () => {
-    if (appIsReady && (fontsLoaded || fontError)) {
+    if (fontsLoaded || fontError) {
       // This tells the splash screen to hide immediately
       await SplashScreen.hideAsync();
     }
-  }, [appIsReady, fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError]);
 
-  if (!appIsReady || (!fontsLoaded && !fontError)) {
+  if (!fontsLoaded && !fontError){
     return null;
   }
-
-
 
   return (
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>

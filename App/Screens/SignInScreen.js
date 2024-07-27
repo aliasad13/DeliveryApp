@@ -67,16 +67,12 @@ function SignInScreen({navigation}) {
         setErrorMessages([]);
         try {
             const response = await login(email, password);
-            console.log('Login successful:', response);
             const existingToken = await SecureStore.getItemAsync('token');
-            console.log('seure store token:', existingToken);
-
+            console.log("Response Data: ", response.data);
 
             if (response){
-                StorageService.setUserToken(response["token"]).then(() => {
-                    console.log('response["token"]', response["token"]);
-
-                    dispatch(setToken(response["token"]))
+                StorageService.setUserToken(response.accessToken).then(() => {
+                    dispatch(setToken(response.accessToken))
                 });
             }
 
@@ -145,7 +141,6 @@ return(
                          onFocus={handleFocusUser}
                          onBlur={handleBlurUser}
                          onChangeText={(text) => {
-                             console.log(text)
                              setEmail(text)
                          }}
               >
@@ -162,7 +157,6 @@ return(
                          onFocus={handleFocusPassword}
                          onBlur={handleBlurPassword}
                          onChangeText={(text) => {
-                             console.log(text)
                              setPassword(text)
                          }}
 

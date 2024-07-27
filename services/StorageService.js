@@ -33,7 +33,6 @@ const getUserToken = async () => {
 };
 
 const setUserToken = async (token) => {
-    console.log("logout token", token)
     try {
         await SecureStore.setItemAsync('token', token);
     } catch (error) {
@@ -42,7 +41,6 @@ const setUserToken = async (token) => {
 };
 
 export const removeUserToken = async () => {
-console.log('------------------------aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa------------------------')
     try {
         await SecureStore.deleteItemAsync('token');
     } catch (error) {

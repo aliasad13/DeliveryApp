@@ -15,52 +15,6 @@ const api = axios.create({
     baseURL: BACKEND_URL,
 });
 
-// Add a request interceptor
-api.interceptors.request.use(
-    async (config) => {
-        const token = await SecureStore.getItemAsync('token');
-        if (token) {
-            config.headers['Authorization'] = 'Bearer ' + token;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
-// Add a response interceptor
-api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
-
-        // Check if this is a login request
-        if (originalRequest.url === '/login') {
-            // Don't attempt to refresh for login errors
-            return Promise.reject(error);
-        }
-
-        if (error.response.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-            try {
-                // Access tokens typically have a short lifespan for security reasons. When they expire, the user would normally need to log in again.
-                // To avoid frequent logins, a refresh token (which has a longer lifespan) is used to obtain a new access token when the current one expires.
-                const refreshToken = await SecureStore.getItemAsync('refreshToken');
-                const res = await axios.post(`${BACKEND_URL}/refresh`, { refreshToken });
-                if (res.status === 200) {
-                    await SecureStore.setItemAsync('token', res.data.token);
-                    axios.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.token;
-                    return api(originalRequest);
-                }
-            } catch (refreshError) {
-                // If refresh fails, reject the promise
-                return Promise.reject(refreshError);
-            }
-        }
-        return Promise.reject(error);
-    }
-);
 
 export async function register(username, email, password, password_confirmation) {
     try {
@@ -70,7 +24,6 @@ export async function register(username, email, password, password_confirmation)
             password_confirmation: password_confirmation,
             username: username
         });
-        console.log('Registration successful:', response.data);
         return response.data;
     } catch (error) {
         console.error('Registration failed:', error.response?.data);
@@ -85,15 +38,27 @@ export async function register(username, email, password, password_confirmation)
 }
 
 export async function login(email, password) {
+    console.log("Email: " + email);
+    console.log("Password: " + password);
+
     try {
         const response = await api.post('/login', { email, password });
-        await SecureStore.setItemAsync('token', response.data.token);
+        console.log("Response Data: ", response.data);
+
         return response.data;
     } catch (error) {
-        console.error('Login failed:', error.response?.status, error.response?.data);
-        if (error.response?.status === 401) {
-            throw ['Invalid email or password'];
+        if (error.response) {
+            console.error("Response Error: ", error.response);
+            if (error.response.status === 401) {
+                throw ['Invalid email or password'];
+            } else {
+                throw ['An unexpected error occurred'];
+            }
+        } else if (error.request) {
+            console.error("Request Error: ", error.request);
+            throw ['No response received from the server'];
         } else {
+            console.error("Error: ", error.message);
             throw ['An unexpected error occurred'];
         }
     }

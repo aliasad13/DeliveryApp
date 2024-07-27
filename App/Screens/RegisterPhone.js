@@ -52,7 +52,6 @@ function RegisterPhone({navigation}) {
     };
 
     const handleItemPress = (item) => {
-        console.log('Selected Item:', item);
         setCountry(item)
         setIsVisible(false);
     };

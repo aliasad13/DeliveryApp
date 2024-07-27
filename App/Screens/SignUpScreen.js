@@ -60,10 +60,8 @@ function SignUpScreen({navigation}) {
         setErrorMessages([]); // Clear previous error messages
         try {
             const response = await register(username, email, password, confirmPassword);
-            console.log('User registered successfully:', response);
             navigation.replace('HomeScreen');
         } catch (error) {
-            console.log('Error caught:', error);
             if (Array.isArray(error)) {
                 setErrorMessages(error);
             } else if (typeof error === 'string') {
@@ -99,7 +97,6 @@ function SignUpScreen({navigation}) {
                     placeholder="Username"
                     value={username}
                     onChangeText={(text) => {
-                        console.log('Username changed:', text);
                         setUsername(text);
                     }}
                     icon={<AntDesign name="user" size={24} color="#B6AE81FF" />}
@@ -110,7 +107,6 @@ function SignUpScreen({navigation}) {
                     placeholder="Mail"
                     value={email}
                     onChangeText={(text) => {
-                        console.log('Email changed:', text);
                         setEmail(text);
                     }}
                     icon={<AntDesign name="mail" size={24} color="#B6AE81FF" />}

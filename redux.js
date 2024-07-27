@@ -24,7 +24,6 @@ const reducer1 = (state = [], action) => {
 // 2. Create a store
 const store = redux.createStore(reducer1); // => reducer1 is the reducer for store, to which an action can be dispatched using store.dispatch(action)
 
-console.log("state1:",store.getState());
 
 
 
@@ -42,7 +41,6 @@ const action1 = {
 
 store.dispatch(action1)
 
-console.log("state2:",store.getState());
 
 
 
@@ -65,4 +63,3 @@ const action2 = {
 
 store.dispatch(action2)
 
-console.log("state3:",store.getState());

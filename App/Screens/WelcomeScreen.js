@@ -26,7 +26,6 @@ const Pagination = ({index}) => {
 
 async function a(){
     const existingToken = await SecureStore.getItemAsync('token');
-    console.log('secure store token welcome:', existingToken);
 }
 
 function renderWelcomeCard(itemData){
