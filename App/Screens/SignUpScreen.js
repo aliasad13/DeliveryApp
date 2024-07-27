@@ -23,6 +23,9 @@ import {useState} from "react";
 import StyledTextInput from "../../components/StyledTextInput";
 import RegisterPhone from "../Screens/RegisterPhone";
 import {register} from '../../utils/https';
+import StorageService from "../../services/StorageService";
+import {setAccessToken, setRefreshToken} from "../../src/actions/GeneralAction";
+import {useDispatch} from "react-redux";
 
 
 function SignUpScreen({navigation}) {
@@ -56,21 +59,29 @@ function SignUpScreen({navigation}) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
+    const dispatch = useDispatch()
+
     const handleSignUp = async () => {
         setErrorMessages([]); // Clear previous error messages
+        setErrorMessages([]);
         try {
             const response = await register(username, email, password, confirmPassword);
-            navigation.replace('HomeScreen');
-        } catch (error) {
-            if (Array.isArray(error)) {
-                setErrorMessages(error);
-            } else if (typeof error === 'string') {
-                setErrorMessages([error]);
-            } else if (error.message) {
-                setErrorMessages([error.message]);
-            } else {
-                setErrorMessages(['An unknown error occurred']);
+
+            if (response){
+                StorageService.setUserAccessToken(response.accessToken).then(() => {
+                    dispatch(setAccessToken(response.accessToken))
+                });
+
+                StorageService.setUserRefreshToken(response.refreshToken).then(() => {
+                    dispatch(setRefreshToken(response.refreshToken))
+                });
             }
+
+            // Handle successful login (e.g., navigate to home screen)
+            // Adjust based on your navigation setup
+        } catch (error) {
+            console.error('Login failed:', error);
+            setErrorMessages(Array.isArray(error) ? error : [error.toString()]);
         }
     };;
 

@@ -73,6 +73,7 @@ export async function register(username, email, password, password_confirmation)
             password_confirmation: password_confirmation,
             username: username
         });
+        console.log("response for sign up: ", response.data)
         return response.data;
     } catch (error) {
         console.error('Registration failed:', error.response?.data);
