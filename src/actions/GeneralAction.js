@@ -68,7 +68,7 @@ const appStart = () => {
                 type: types.SET_FIRST_TIME_USE,
                 payload: isActuallyFirstTimeUse
             });
-
+// before the app starts we are taking the access token from secure store and updating it in state
             if (accessToken) {
                 dispatch({
                     type: types.SET_ACCESS_TOKEN,

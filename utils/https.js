@@ -1,7 +1,32 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import {getAccessTokenFromStore, getRefreshTokenFromStore} from "../src/Store";
+
+const getAccessToken = async () => {
+    return await SecureStore.getItemAsync('accessToken');
+}
+
+async function getRefreshToken() {
+    return await SecureStore.getItemAsync('refreshToken');
+}
 
 const BACKEND_URL = 'http://192.168.20.2:3001';
+const accessToken = getAccessTokenFromStore() ;//|| await getAccessToken();
+const refreshToken = getRefreshTokenFromStore();// || getRefreshToken();
+//Function to get token from redux state store => since its not a async storage we can get it without delay due to async requests
+//if we want both conditions we can use the below method
+
+// const getAccessTokenFromBothSources = async () => {
+//     const tokenFromStore = getAccessTokenFromStore();
+//     if (tokenFromStore) {
+//         return tokenFromStore;
+//     } else {
+//         return await getAccessToken();
+//     }
+// };
+//
+// // Usage:
+// const accessToken = await getAccessTokenFromBothSources();
 
 // Create an axios instance
 const api = axios.create({
@@ -11,14 +36,12 @@ const api = axios.create({
     },
 });
 
+
 // Function to get token from secure storage
-async function getAccessToken() {
-    return await SecureStore.getItemAsync('accessToken');
-}
+
 
 // Function to refresh tokens
 async function refreshTokens() {
-    const refreshToken = await SecureStore.getItemAsync('refreshToken');
     try {
         const response = await axios.post(`${BACKEND_URL}/refresh`, {}, {
             headers: {
@@ -37,9 +60,11 @@ async function refreshTokens() {
 // Add a request interceptor to inject the access token
 api.interceptors.request.use(
     async config => {
-        const token = await getAccessToken();
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
+
+        console.log('token: ', accessToken)
+        // const token = await getAccessToken();
+        if (accessToken) {
+            config.headers['Authorization'] = `Bearer ${accessToken}`;
         }
         return config;
     },
@@ -74,7 +99,6 @@ export async function register(username, email, password, password_confirmation)
             password_confirmation: password_confirmation,
             username: username
         });
-        console.log("response for sign up: ", response.data)
         return response.data;
     } catch (error) {
         console.error('Registration failed:', error.response?.data);
@@ -93,19 +117,27 @@ export async function login(email, password) {
         const response = await api.post('/login', { email, password });
         return response.data;
     } catch (error) {
-        if (error.response?.status === 401) {
-            throw ['Invalid email or password'];
+        if (error.response?.data?.errors) {
+            throw [error.response.data.errors];
         } else {
             throw ['An unexpected error occurred'];
         }
     }
 }
 
-export async function fetchData() {
+
+// User Service
+export async function fetchUserData() {
     try {
-        const response = await api.get('/data');
+        const response = await api.get('/user');
         return response.data;
     } catch (error) {
-        throw ['An unexpected error occurred'];
+        if (error.response?.data?.errors) {
+            throw [error.response.data.errors];
+        }else {
+            throw ['An unexpected error occurred'];
+        }
     }
-}
+};
+
+

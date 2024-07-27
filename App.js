@@ -2,7 +2,7 @@
 import { useFonts } from 'expo-font';
 import {Provider} from 'react-redux'
 
-import Store from './src/Store'
+import {Store} from './src/Store'
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { View } from 'react-native';

@@ -14,10 +14,8 @@ const GeneralReducer = (state = initialState, action) => {
         case types.SET_IS_APP_LOADING:
             return {...state, isAppLoading: action.payload};
         case types.SET_ACCESS_TOKEN:
-            console.log("+++++++++++refreshToken:", action.payload)
             return {...state, accessToken: action.payload};
         case types.SET_REFRESH_TOKEN:
-            console.log("+++++++++++refreshToken:", action.payload)
             return {...state, refreshToken: action.payload};
         case types.SET_FIRST_TIME_USE:
             return {...state, isFirstTimeUse: action.payload};

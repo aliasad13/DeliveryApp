@@ -1,11 +1,12 @@
 import React from 'react';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { logout } from '../../utils/https'; // Adjust the import path as needed
+import {fetchUserData, logout} from '../../utils/https'; // Adjust the import path as needed
 import {removeToken, setToken} from '../../src/actions/GeneralAction';
 import {connect} from "react-redux";
 import StorageService, {removeUserToken} from "../../services/StorageService";
 import {useDispatch} from "react-redux";
+import Separator from "../../components/Separator";
 
 function HomeScreen() {
 
@@ -17,11 +18,20 @@ function HomeScreen() {
         });
     };
 
+    const getUserInfo = async () => {
+        const response = await fetchUserData()
+        console.log("userInfo", response)
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.text}>HomeScreen</Text>
             <TouchableOpacity style={styles.button} onPress={handleLogout}>
                 <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+            <Separator />
+            <TouchableOpacity style={styles.button} onPress={getUserInfo}>
+                <Text style={styles.buttonText}>UserInfo</Text>
             </TouchableOpacity>
         </View>
     );
