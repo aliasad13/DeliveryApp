@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 const getFirstTimeUse = async () => {
     try {
         const value = await SecureStore.getItemAsync('isFirstTimeUse');
-        return value === null; // If null, it's the first time
+        return value // If null, it's the first time
     } catch (error) {
         console.error('Error checking first time user:', error);
         return true; // Assume it's the first time if there's an error
@@ -17,6 +17,14 @@ const setFirstTimeUse = async () => {
         // On clicking get started we add a value.
         // then in appStart we check if there is value for isFirstTimeUse in SecureStore.
         // this is used to display or hide welcome screen
+    } catch (error) {
+        console.error('Error setting not first time user:', error);
+    }
+};
+
+const removeFirstTimeUse = async () => {
+    try {
+        await SecureStore.deleteItemAsync('isFirstTimeUse');
     } catch (error) {
         console.error('Error setting not first time user:', error);
     }
@@ -71,4 +79,5 @@ export const removeUserToken = async () => {
     }
 };
 
-export default {getUserAccessToken, setUserRefreshToken, getUserRefreshToken, getFirstTimeUse, setFirstTimeUse, setUserAccessToken, removeUserToken}
+export default {getUserAccessToken, setUserRefreshToken, getUserRefreshToken,
+    getFirstTimeUse, setFirstTimeUse, setUserAccessToken, removeUserToken, removeFirstTimeUse}

@@ -1,11 +1,13 @@
 import StorageService from "../../services/StorageService";
+import * as SecureStore from "expo-secure-store";
 
 const types = {
     SET_IS_APP_LOADING: 'SET_IS_APP_LOADING',
     SET_ACCESS_TOKEN: 'SET_ACCESS_TOKEN',
     SET_REFRESH_TOKEN: 'SET_REFRESH_TOKEN',
     REMOVE_TOKEN: 'REMOVE_TOKEN',
-    SET_FIRST_TIME_USE: 'SET_FIRST_TIME_USE'
+    SET_FIRST_TIME_USE: 'SET_FIRST_TIME_USE',
+    REMOVE_FIRST_TIME_USE: 'REMOVE_FIRST_TIME_USE'
 }
 
 const setIsAppLoading = (isAppLoading) => {
@@ -42,6 +44,12 @@ const setIsFirstTimeUse = () => {
     };
 }
 
+const removeIsFirstTimeUse = () => {
+    return {
+        type: types.REMOVE_FIRST_TIME_USE,
+    };
+}
+
 
 const appStart = () => {
     return async (dispatch, getState) => {
@@ -52,8 +60,10 @@ const appStart = () => {
                 StorageService.getUserAccessToken(),
                 StorageService.getUserRefreshToken()
             ]);
+            const a = await SecureStore.getItemAsync('accessToken');
 
             const isActuallyFirstTimeUse = isFirstTimeUse === null || isFirstTimeUse === undefined;
+
             dispatch({
                 type: types.SET_FIRST_TIME_USE,
                 payload: isActuallyFirstTimeUse
@@ -90,4 +100,4 @@ const appStart = () => {
 }
 
 
-export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken };
+export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken, removeIsFirstTimeUse };

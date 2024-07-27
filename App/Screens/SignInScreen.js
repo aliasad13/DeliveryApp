@@ -28,7 +28,12 @@ import {login} from "../../utils/https";
 // import ResetPassword from "./ResetPassword";
 import HomeScreen from "./HomeScreen";
 import {connect, useDispatch, useSelector} from "react-redux";
-import {setAccessToken, setIsFirstTimeUse, setRefreshToken} from '../../src/actions/GeneralAction';
+import {
+    removeIsFirstTimeUse,
+    setAccessToken,
+    setIsFirstTimeUse,
+    setRefreshToken
+} from '../../src/actions/GeneralAction';
 import StorageService from "../../services/StorageService";
 
 
@@ -56,11 +61,11 @@ function SignInScreen({navigation}) {
     const dispatch = useDispatch()
 
 
-    // const makeFirstTimeUseTrue = () => {
-    //     StorageService.setFirstTimeUse().then(() => {
-    //         dispatch(setIsFirstTimeUse())
-    //     })
-    // }
+    const makeFirstTimeUseTrue = () => {
+        StorageService.removeFirstTimeUse().then(() => {
+            dispatch(removeIsFirstTimeUse())
+        })
+    }
 
     const handleLogin = async () => {
         setSignInClicked(true);
@@ -138,7 +143,7 @@ return(
           <View style={isFocusedUser ? styles.usernameInputShadow : styles.usernameInput}>
               <AntDesign name="user" size={24} color="#B6AE81FF" style={styles.userIcon}/>
               <TextInput style={styles.userNameTextInput}
-                         placeholder={"Username"}
+                         placeholder={"Email/Username"}
                          keyboardAppearance={"dark"}
                          onFocus={handleFocusUser}
                          onBlur={handleBlurUser}
@@ -212,13 +217,13 @@ return(
 
           <Separator/>
 
-          {/*<View >*/}
-          {/*    <TouchableOpacity style={styles.signIn} onPress={makeFirstTimeUseTrue} disabled={signInClicked}>*/}
-          {/*        <Text style={styles.signInText}>*/}
-          {/*            {signInClicked ? <ActivityIndicator color={"white"}/> : "First time login"}*/}
-          {/*        </Text>*/}
-          {/*    </TouchableOpacity>*/}
-          {/*</View>*/}
+          <View >
+              <TouchableOpacity style={styles.signIn} onPress={makeFirstTimeUseTrue} disabled={signInClicked}>
+                  <Text style={styles.signInText}>
+                      {signInClicked ? <ActivityIndicator color={"white"}/> : "First time login"}
+                  </Text>
+              </TouchableOpacity>
+          </View>
 
 
 
@@ -275,6 +280,7 @@ const styles = StyleSheet.create({
       backgroundColor: "#ffffff",
       alignItems: 'center',
       justifyContent: 'center',
+      width: '100%'
   },
     errorContainer: {
         marginTop: 10,

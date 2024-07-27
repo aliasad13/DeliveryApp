@@ -55,7 +55,8 @@ api.interceptors.response.use(
     },
     async error => {
         const originalRequest = error.config;
-        if (error.response.status === 401 && !originalRequest._retry) {
+        // Check if the request is for the login endpoint
+        if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/login') {
             originalRequest._retry = true;
             const newAccessToken = await refreshTokens();
             axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
