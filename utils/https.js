@@ -42,6 +42,7 @@ api.interceptors.response.use(
         if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/login') {
             originalRequest._retry = true;
             const newAccessToken = await refreshTokens();
+            // the logic to log user out is written in refreshTokens()
             axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
             return api(originalRequest);
         }

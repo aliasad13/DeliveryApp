@@ -1,6 +1,5 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-import {refreshTokens} from "../utils/https";
 
 const BACKEND_URL = 'http://192.168.20.2:3001';
 
@@ -12,9 +11,6 @@ const api = axios.create({
 });
 
 const accessTokenFromSecureStore = async () => await SecureStore.getItemAsync('accessToken');
-const refreshTokenFromSecureStore = async () => await SecureStore.getItemAsync('refreshToken');
-
-
 
 api.interceptors.request.use(
     async config => {
@@ -31,28 +27,13 @@ api.interceptors.request.use(
     }
 );
 
-api.interceptors.response.use(
-    response => {
-        return response;
-    },
-    async error => {
-        const originalRequest = error.config;
-        // Check if the request is for the login endpoint
-        if (error.response.status === 401 && !originalRequest._retry && originalRequest.url !== '/login') {
-            originalRequest._retry = true;
-            const newAccessToken = await refreshTokens();
-            axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-            return api(originalRequest);
-        }
-        return Promise.reject(error);
-    }
-);
-
 const fetchUserData = async () => {
     try {
         const response = await api.get('/user');
         return response.data;
     } catch (error) {
+        console.log("+==========++++====+++====== error ", error)
+
         if (error.response?.data?.errors) {
             throw [error.response.data.errors];
         }else {

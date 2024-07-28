@@ -1,5 +1,12 @@
 import StorageService from "../../services/StorageService";
-import userService, {fetchUserData} from '../../services/userService'
+import userService, {
+    fetchUserData,
+    getRefreshToken, removeTokensFromAState,
+    setAccessTokenInAState,
+    setRefreshTokenInAState
+} from '../../services/userService'
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
 const types = {
     SET_IS_APP_LOADING: 'SET_IS_APP_LOADING',
@@ -51,6 +58,40 @@ const removeIsFirstTimeUse = () => {
     };
 }
 
+async function refreshTokensUser() {
+    try {
+        const refreshToken = await SecureStore.getItemAsync('refreshToken');
+        const response = await axios.post(`${BACKEND_URL}/refresh`, {}, {
+            headers: {
+                'Authorization': `Bearer ${refreshToken}`
+            }
+        });
+        console.log('----------------------RefreshTokenResponse--------------------------:', response?.data);
+
+        const newAccessToken = response.data.accessToken;
+        const newRefreshToken = response.data.refreshToken;
+
+        // Update SecureStore
+        await SecureStore.setItemAsync('accessToken', newAccessToken);
+        await SecureStore.setItemAsync('refreshToken', newRefreshToken);
+
+        return { newAccessToken, newRefreshToken };
+    } catch (error) {
+        console.error("+++++======+++++===++++=++++ Token refresh failed: ", error.response);
+        throw error.response;
+    }
+}
+
+async function logoutUserService() {
+    try {
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
+        console.error('secure store tokens has been deleted' );
+    } catch (error) {
+        console.error('Error during logout:', error);
+    }
+}
+
 
 const appStart = () => {
     console.log('----------------------------inside appStart--------------------------------')
@@ -75,15 +116,49 @@ const appStart = () => {
                     type: types.SET_ACCESS_TOKEN,
                     payload: accessToken
                 });
-                userService.fetchUserData().then((userData) => {  //fetch userdata only if there exists accessToken
-                    if (userData?.status){
-                        console.log(userData)
+
+
+                let userData;
+                try {
+                    userData = await userService.fetchUserData();
+                } catch (error) {
+                    console.log("Error fetching user data------------------------------------------------>>>>>>>>: ", error);
+                    try {
+                        // if there is error fetching the userData we create a refresh token and send the request again in hope that the issue is because of expired token
+                        const { newAccessToken, newRefreshToken } = await refreshTokensUser();
+                        console.log("newAccessToken:::", newAccessToken);
+                        console.log("newRefreshToken::::", newAccessToken);
                         dispatch({
-                            type: types.SET_USER_DATA,
-                            payload: userData
-                        })
+                            type: types.SET_ACCESS_TOKEN,
+                            payload: newAccessToken
+                        });
+                        dispatch({
+                            type: types.SET_REFRESH_TOKEN,
+                            payload: newRefreshToken
+                        });
+                        userData = await userService.fetchUserData();
+                    } catch (refreshError) {
+                        // if there occurs error in creating the refresh token this means the token is absent of the is invalid, so we log the user out
+                        console.log("Error refreshing token and fetching user data: ", refreshError);
+                        await logoutUserService();
+                        dispatch({
+                            type: types.REMOVE_TOKEN
+                        });
+                        console.error('redux state tokens has been deleted' );
+                        return;
                     }
-                })
+                }
+                console.log("Finally userData ", userData);
+
+                if (userData?.status) {
+                    console.log(userData);
+                    dispatch({
+                        type: types.SET_USER_DATA,
+                        payload: userData
+                    });
+                } else {
+                    console.log('User data does not have status');
+                }
             }
 
             if (refreshToken) {
@@ -92,7 +167,6 @@ const appStart = () => {
                     payload: refreshToken
                 });
             }
-
             dispatch({
                 type: types.SET_IS_APP_LOADING,
                 payload: false
