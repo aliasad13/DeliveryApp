@@ -57,7 +57,7 @@ const appStart = () => {
     return async (dispatch, getState) => {
         try {
             // Use Promise.all to wait for both async operations to complete
-            const [isFirstTimeUse, accessToken, refreshToken, userInfo] = await Promise.all([
+            const [isFirstTimeUse, accessToken, refreshToken] = await Promise.all([
                 StorageService.getFirstTimeUse(),
                 StorageService.getUserAccessToken(),
                 StorageService.getUserRefreshToken(),
@@ -77,15 +77,11 @@ const appStart = () => {
                 });
                 userService.fetchUserData().then((userData) => {  //fetch userdata only if there exists accessToken
                     if (userData?.status){
-                        console.log(userInfo)
+                        console.log(userData)
                         dispatch({
                             type: types.SET_USER_DATA,
-                            payload: userInfo
+                            payload: userData
                         })
-                        dispatch({
-                            type: types.SET_IS_APP_LOADING,
-                            payload: false
-                        });
                     }
                 })
             }
@@ -96,6 +92,12 @@ const appStart = () => {
                     payload: refreshToken
                 });
             }
+
+            dispatch({
+                type: types.SET_IS_APP_LOADING,
+                payload: false
+            });
+
         } catch (error) {
             console.error("Error in appStart:", error);
             // Ensure isAppLoading is set to false even if there's an error
