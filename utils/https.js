@@ -1,30 +1,11 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { getAccessToken, getRefreshToken } from "../services/tokenService";
+import {removeToken} from "../src/actions/GeneralAction";
 import {Store} from "../src/Store";
-import {setAccessToken, setRefreshToken} from "../src/actions/GeneralAction";
 
 const BACKEND_URL = 'http://192.168.20.2:3001';
-const accessTokenFromState = () => Store?.getState()?.generalState?.accessToken;
-const refreshTokenFromState = () => Store?.getState()?.generalState?.refreshToken;
 
-const accessTokenFromSecureStore = async () => await SecureStore.getItemAsync('accessToken');
-const refreshTokenFromSecureStore = async () => await SecureStore.getItemAsync('refreshToken');
-
-const getAccessToken = async () => {
-    let accessToken = accessTokenFromState();
-    if (!accessToken) {
-        accessToken = await accessTokenFromSecureStore();
-    }
-    return accessToken;
-}
-
-const getRefreshToken = async () => {
-    let refreshToken = refreshTokenFromState();
-    if (!refreshToken) {
-        refreshToken = await refreshTokenFromSecureStore();
-    }
-    return refreshToken;
-}
 
 // Create an axios instance
 const api = axios.create({
@@ -34,6 +15,20 @@ const api = axios.create({
     },
 });
 // Function to refresh tokens
+
+const logoutUser = async () => {
+    try {
+        // Clear tokens from SecureStore
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
+
+        Store.dispatch(removeToken());
+
+    } catch (error) {
+        console.error('Error during logout:', error);
+    }
+}
+
 export async function refreshTokens() {
     try {
         const refreshToken = await getRefreshToken();
@@ -51,10 +46,15 @@ export async function refreshTokens() {
         await SecureStore.setItemAsync('accessToken', newAccessToken);
         await SecureStore.setItemAsync('refreshToken', newRefreshToken);
 
+
         return newAccessToken;
     } catch (error) {
         console.error("Token refresh failed: ", error.response);
-        throw ['An unexpected error occurred'];
+        await logoutUser(); // Log out the user if refresh fails => this is because, if any request fails due to 401,
+        // a request is send to refresh end point hoping that its because of expired token.
+        // To send a refresh request we need a refresh token.
+                                // Without any token, the refresh end point will return a 401 error
+        throw error.response;
     }
 }
 
@@ -72,6 +72,8 @@ api.interceptors.request.use(
         return Promise.reject(error);
     }
 );
+
+
 
 // Add a response interceptor to handle 401 errors
 api.interceptors.response.use(

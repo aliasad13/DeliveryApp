@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-
+import {refreshTokens} from "../utils/https";
 
 const BACKEND_URL = 'http://192.168.20.2:3001';
 
@@ -14,21 +14,7 @@ const api = axios.create({
 const accessTokenFromSecureStore = async () => await SecureStore.getItemAsync('accessToken');
 const refreshTokenFromSecureStore = async () => await SecureStore.getItemAsync('refreshToken');
 
-async function refreshTokens() {
-    try {
-        const refreshToken = await refreshTokenFromSecureStore();
-        const response = await axios.post(`${BACKEND_URL}/refresh`, {}, {
 
-            headers: {
-                'Authorization': `Bearer ${refreshToken}`
-            }
-        });
-        return response.data.accessToken;
-    } catch (error) {
-        console.error("Token refresh failed: ", error.response.data.errors);
-        throw error.response.data.errors;
-    }
-}
 
 api.interceptors.request.use(
     async config => {
