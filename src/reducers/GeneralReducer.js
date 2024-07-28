@@ -7,7 +7,8 @@ const initialState = {
     accessToken: '', //token needed to be added in state management because its ued in every transaction
     refreshToken: '', //token needed to be added in state management because its ued in every transaction
     isFirstTimeUse: true,
-    userData: {}
+    userData: {},
+    fontsLoaded: false
 }
 
 const GeneralReducer = (state = initialState, action) => {
@@ -26,6 +27,8 @@ const GeneralReducer = (state = initialState, action) => {
         case types.REMOVE_TOKEN:
             return {...state, accessToken: '', refreshToken: ''};
         case types.SET_USER_DATA:
+            return {...state, userData: action.payload};
+        case types.SET_FONTS_LOADED:
             return {...state, userData: action.payload};
         default:
             return state;

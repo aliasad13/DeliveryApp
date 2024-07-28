@@ -1,6 +1,5 @@
 import WelcomeScreen from "../App/Screens/WelcomeScreen";
 import SignInScreen from "../App/Screens/SignInScreen";
-// import SplashScreen from '../App/Screens/SplashScreen'
 import SignUpScreen from "../App/Screens/SignUpScreen";
 import HomeScreen from "../App/Screens/HomeScreen";
 import {NavigationContainer} from "@react-navigation/native";
@@ -12,7 +11,6 @@ import {useEffect} from "react";
 import {appStart} from "../src/actions/GeneralAction";
 import * as SplashScreen from 'expo-splash-screen';
 
-
 const Stack = createNativeStackNavigator();
 
 function Navigators() {
@@ -23,8 +21,11 @@ function Navigators() {
         dispatch(appStart())
     }, []);
 
+    console.log('isAppLoading:::::::::::', isAppLoading)
     if (isAppLoading) {
-        return null; // Or a loading indicator if you prefer
+        SplashScreen.preventAutoHideAsync();
+    }else{
+        SplashScreen.hideAsync();
     }
 
     return (

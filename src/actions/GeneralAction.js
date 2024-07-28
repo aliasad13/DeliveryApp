@@ -1,12 +1,10 @@
 import StorageService from "../../services/StorageService";
 import userService, {
-    fetchUserData,
-    getRefreshToken, removeTokensFromAState,
-    setAccessTokenInAState,
-    setRefreshTokenInAState
+    fetchUserData
 } from '../../services/userService'
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import * as Font from 'expo-font';
 
 const types = {
     SET_IS_APP_LOADING: 'SET_IS_APP_LOADING',
@@ -15,7 +13,9 @@ const types = {
     REMOVE_TOKEN: 'REMOVE_TOKEN',
     SET_FIRST_TIME_USE: 'SET_FIRST_TIME_USE',
     REMOVE_FIRST_TIME_USE: 'REMOVE_FIRST_TIME_USE',
-    SET_USER_DATA: 'SET_USER_DATA'
+    SET_USER_DATA: 'SET_USER_DATA',
+    SET_FONTS_LOADED: 'SET_FONTS_LOADED',
+    SET_FONT_ERROR: 'SET_FONT_ERROR'
 }
 
 const setIsAppLoading = (isAppLoading) => {
@@ -58,6 +58,20 @@ const removeIsFirstTimeUse = () => {
     };
 }
 
+const setFontsLoaded = (fontsLoaded) => {
+    return {
+        type: types.SET_FONTS_LOADED,
+        payload: fontsLoaded
+    };
+};
+
+const setFontError = (fontError) => {
+    return {
+        type: types.SET_FONT_ERROR,
+        payload: fontError
+    };
+};
+
 async function refreshTokensUser() {
     try {
         const refreshToken = await SecureStore.getItemAsync('refreshToken');
@@ -98,10 +112,19 @@ const appStart = () => {
     return async (dispatch, getState) => {
         try {
             // Use Promise.all to wait for both async operations to complete
-            const [isFirstTimeUse, accessToken, refreshToken] = await Promise.all([
+            const [isFirstTimeUse, accessToken, refreshToken, fontsLoaded] = await Promise.all([
                 StorageService.getFirstTimeUse(),
                 StorageService.getUserAccessToken(),
                 StorageService.getUserRefreshToken(),
+                Font.loadAsync({
+                    'astrix': require('../../assets/Fonts/Asterix.ttf'),
+                    'rubik-black': require('../../assets/Fonts/Rubik-Black.ttf'),
+                    'rubik-blackItalic': require('../../assets/Fonts/Rubik-BlackItalic.ttf'),
+                    'rubik-bold': require('../../assets/Fonts/Rubik-Bold.ttf'),
+                    'rubik-boldItalic': require('../../assets/Fonts/Rubik-BoldItalic.ttf'),
+                    'rubik-medium': require('../../assets/Fonts/Rubik-Medium.ttf'),
+                    'rubik-Regular': require('../../assets/Fonts/Rubik-Regular.ttf'),
+                }).then(() => true).catch((error) => { throw error; })
             ]);
 
             const isActuallyFirstTimeUse = isFirstTimeUse === null || isFirstTimeUse === undefined;
@@ -116,7 +139,12 @@ const appStart = () => {
                     type: types.SET_ACCESS_TOKEN,
                     payload: accessToken
                 });
-
+                if (refreshToken) {
+                    dispatch({
+                        type: types.SET_REFRESH_TOKEN,
+                        payload: refreshToken
+                    });
+                }
 
                 let userData;
                 try {
@@ -161,10 +189,11 @@ const appStart = () => {
                 }
             }
 
-            if (refreshToken) {
+            console.log('fontsLoaded =================>', fontsLoaded)
+            if (fontsLoaded){
                 dispatch({
-                    type: types.SET_REFRESH_TOKEN,
-                    payload: refreshToken
+                    type: types.SET_FONTS_LOADED,
+                    payload: true
                 });
             }
             dispatch({
@@ -184,4 +213,4 @@ const appStart = () => {
 }
 
 
-export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken, removeIsFirstTimeUse };
+export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken, removeIsFirstTimeUse, setFontsLoaded };
