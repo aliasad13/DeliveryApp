@@ -25,14 +25,15 @@ async function refreshTokens() {
         });
         return response.data.accessToken;
     } catch (error) {
-        console.error("Token refresh failed: ", error.response);
-        throw ['An unexpected error occurred'];
+        console.error("Token refresh failed: ", error.response.data.errors);
+        throw error.response.data.errors;
     }
 }
 
 api.interceptors.request.use(
     async config => {
         const accessToken = await accessTokenFromSecureStore();
+        console.log('UserService AccessToken---------------------', accessToken)
         console.log('token: ', accessToken)
         if (accessToken) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;

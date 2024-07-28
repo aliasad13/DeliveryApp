@@ -61,7 +61,6 @@ const appStart = () => {
                 StorageService.getFirstTimeUse(),
                 StorageService.getUserAccessToken(),
                 StorageService.getUserRefreshToken(),
-                userService.fetchUserData()
             ]);
 
             const isActuallyFirstTimeUse = isFirstTimeUse === null || isFirstTimeUse === undefined;
@@ -70,11 +69,25 @@ const appStart = () => {
                 payload: isActuallyFirstTimeUse
             });
 
+            console.log('appStart() AccessToken---------------------', accessToken)
             if (accessToken) {
                 dispatch({
                     type: types.SET_ACCESS_TOKEN,
                     payload: accessToken
                 });
+                userService.fetchUserData().then((userData) => {  //fetch userdata only if there exists accessToken
+                    if (userData?.status){
+                        console.log(userInfo)
+                        dispatch({
+                            type: types.SET_USER_DATA,
+                            payload: userInfo
+                        })
+                        dispatch({
+                            type: types.SET_IS_APP_LOADING,
+                            payload: false
+                        });
+                    }
+                })
             }
 
             if (refreshToken) {
@@ -83,19 +96,6 @@ const appStart = () => {
                     payload: refreshToken
                 });
             }
-
-            if(userInfo){
-                console.log(userInfo)
-                dispatch({
-                    type: types.SET_USER_DATA,
-                    payload: userInfo
-                })
-                dispatch({
-                    type: types.SET_IS_APP_LOADING,
-                    payload: false
-                });
-            }
-
         } catch (error) {
             console.error("Error in appStart:", error);
             // Ensure isAppLoading is set to false even if there's an error
