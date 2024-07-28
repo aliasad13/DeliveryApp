@@ -66,7 +66,7 @@ export async function refreshTokens() {
 
         return newAccessToken;
     } catch (error) {
-        console.error("Token refresh failed: ", error.response);
+        console.error("Token refresh failed: ", error);
         await logoutUser(); // Log out the user if refresh fails => this is because, if any request fails due to 401,
         // a request is send to refresh end point hoping that its because of expired token.
         // To send a refresh request we need a refresh token.
