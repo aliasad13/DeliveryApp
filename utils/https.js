@@ -1,37 +1,30 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-// import { Store, getAccessTokenFromStore, getRefreshTokenFromStore } from "../src/Store";
-
-const getAccessToken = async () => {
-    return await SecureStore.getItemAsync('accessToken');
-}
-
-async function getRefreshToken() {
-    return await SecureStore.getItemAsync('refreshToken');
-}
+import {Store} from "../src/Store";
+import {setAccessToken, setRefreshToken} from "../src/actions/GeneralAction";
 
 const BACKEND_URL = 'http://192.168.20.2:3001';
-const accessToken = async () => {
-    return await SecureStore.getItemAsync('accessToken');
-}
-const refreshToken = async () => {
-    return await SecureStore.getItemAsync('refreshToken');
+const accessTokenFromState = () => Store?.getState()?.generalState?.accessToken;
+const refreshTokenFromState = () => Store?.getState()?.generalState?.refreshToken;
+
+const accessTokenFromSecureStore = async () => await SecureStore.getItemAsync('accessToken');
+const refreshTokenFromSecureStore = async () => await SecureStore.getItemAsync('refreshToken');
+
+const getAccessToken = async () => {
+    let accessToken = accessTokenFromState();
+    if (!accessToken) {
+        accessToken = await accessTokenFromSecureStore();
+    }
+    return accessToken;
 }
 
-//Function to get token from redux state => since its not a async storage we can get it without delay due to async requests
-//if we want both conditions we can use the below method
-
-// const getAccessTokenFromBothSources = async () => {
-//     const tokenFromStore = getAccessTokenFromStore();
-//     if (tokenFromStore) {
-//         return tokenFromStore;
-//     } else {
-//         return await getAccessToken();
-//     }
-// };
-//
-// // Usage:
-// const accessToken = await getAccessTokenFromBothSources();
+const getRefreshToken = async () => {
+    let refreshToken = refreshTokenFromState();
+    if (!refreshToken) {
+        refreshToken = await refreshTokenFromSecureStore();
+    }
+    return refreshToken;
+}
 
 // Create an axios instance
 const api = axios.create({
@@ -40,30 +33,25 @@ const api = axios.create({
         'Content-Type': 'application/json',
     },
 });
-
-
-// Function to get token from secure storage
-
-
 // Function to refresh tokens
 export async function refreshTokens() {
     try {
+        const refreshToken = await getRefreshToken();
         const response = await axios.post(`${BACKEND_URL}/refresh`, {}, {
             headers: {
                 'Authorization': `Bearer ${refreshToken}`
             }
         });
-
         console.log('----------------------RefreshTokenResponse--------------------------:', response?.data)
-        // When you refresh the token in https.js, you should indeed update both the
-        // SecureStore and the Redux state. in appStart we are updating the state with tokens from the secureStore,
-        // but appStart() only runs when the app initializes, so it won't catch token updates that
-        // happen during the app's lifecycle.
 
-        // update redux state and secure store with the new tokens
+        const newAccessToken = response.data.accessToken;
+        const newRefreshToken = response.data.refreshToken;
 
+        // Update SecureStore
+        await SecureStore.setItemAsync('accessToken', newAccessToken);
+        await SecureStore.setItemAsync('refreshToken', newRefreshToken);
 
-        return response.data.accessToken;
+        return newAccessToken;
     } catch (error) {
         console.error("Token refresh failed: ", error.response);
         throw ['An unexpected error occurred'];
@@ -73,9 +61,8 @@ export async function refreshTokens() {
 // Add a request interceptor to inject the access token
 api.interceptors.request.use(
     async config => {
-
+        const accessToken = await getAccessToken();
         console.log('token: ', accessToken)
-        // const token = await getAccessToken();
         if (accessToken) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;
         }

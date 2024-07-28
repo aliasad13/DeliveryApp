@@ -1,5 +1,4 @@
 import StorageService from "../../services/StorageService";
-import * as SecureStore from "expo-secure-store";
 import userService, {fetchUserData} from '../../services/userService'
 
 const types = {
@@ -64,18 +63,13 @@ const appStart = () => {
                 StorageService.getUserRefreshToken(),
                 userService.fetchUserData()
             ]);
-            // const userInfo = await fetchUserData()
-            // const a = await SecureStore.getItemAsync('accessToken');
-
-
-
 
             const isActuallyFirstTimeUse = isFirstTimeUse === null || isFirstTimeUse === undefined;
             dispatch({
                 type: types.SET_FIRST_TIME_USE,
                 payload: isActuallyFirstTimeUse
             });
-// before the app starts we are taking the access token from secure store and updating it in state
+
             if (accessToken) {
                 dispatch({
                     type: types.SET_ACCESS_TOKEN,
@@ -101,8 +95,6 @@ const appStart = () => {
                     payload: false
                 });
             }
-
-            // Set isAppLoading to false only after all other states are updated
 
         } catch (error) {
             console.error("Error in appStart:", error);

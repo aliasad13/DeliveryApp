@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
+
 const BACKEND_URL = 'http://192.168.20.2:3001';
 
 const api = axios.create({
@@ -10,17 +11,14 @@ const api = axios.create({
     },
 });
 
-const accessToken = async () => {
-    return await SecureStore.getItemAsync('accessToken');
-}
-const refreshToken = async () => {
-    return await SecureStore.getItemAsync('refreshToken');
-}
+const accessTokenFromSecureStore = async () => await SecureStore.getItemAsync('accessToken');
+const refreshTokenFromSecureStore = async () => await SecureStore.getItemAsync('refreshToken');
 
-// Function to refresh tokens
 async function refreshTokens() {
     try {
+        const refreshToken = await refreshTokenFromSecureStore();
         const response = await axios.post(`${BACKEND_URL}/refresh`, {}, {
+
             headers: {
                 'Authorization': `Bearer ${refreshToken}`
             }
@@ -34,6 +32,7 @@ async function refreshTokens() {
 
 api.interceptors.request.use(
     async config => {
+        const accessToken = await accessTokenFromSecureStore();
         console.log('token: ', accessToken)
         if (accessToken) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;
