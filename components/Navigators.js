@@ -22,10 +22,15 @@ function Navigators() {
     }, []);
 
     console.log('isAppLoading:::::::::::', isAppLoading)
+    // to avoid the slight delay that causes the welcome screens to show briefly, we use useEffect  
+    useEffect(() => {
+        if (!isAppLoading) {
+            SplashScreen.hideAsync();
+        }
+    }, [isAppLoading]);
+
     if (isAppLoading) {
-        SplashScreen.preventAutoHideAsync();
-    }else{
-        SplashScreen.hideAsync();
+        return null;
     }
 
     return (
