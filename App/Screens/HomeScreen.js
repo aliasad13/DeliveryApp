@@ -1,5 +1,5 @@
-import React from 'react';
-import {Text, View, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {Text, View, TouchableOpacity, StyleSheet, StatusBar, SafeAreaView, TextInput, Animated} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {removeToken, setToken} from '../../src/actions/GeneralAction';
 import {connect} from "react-redux";
@@ -9,6 +9,10 @@ import Separator from "../../components/Separator";
 import {getUserData} from "../../utils/https";
 import {Colors} from "../../constants/Colors";
 import {Feather, Ionicons} from '@expo/vector-icons';
+import {setHeight, setWidth} from "../../utils/Display";
+import Mocks from "react-native-gesture-handler/src/mocks";
+import DummyCategories from "../../src/constants/DummyCategories";
+import CategoryMenuItem from "../../components/CategoryMenuItem";
 
 function HomeScreen() {
 
@@ -24,6 +28,33 @@ function HomeScreen() {
         const response = await getUserData()
         console.log("userInfo", response)
     }
+
+    const [isFocusedSearch, setIsFocusedSearch] = useState(false);
+
+    const handleFocusSearch = () => {
+        setIsFocusedSearch(true);
+    };
+    const handleBlurSearch = () => {
+        setIsFocusedSearch(false);
+    };
+    const searchWidth = useRef(new Animated.Value(setWidth(50))).current;
+
+    useEffect(() => {
+        Animated.timing(searchWidth, {
+            toValue: isFocusedSearch ? setWidth(80) : setWidth(50),
+            duration: 400, // Duration of the animation in milliseconds
+            useNativeDriver: false,
+        }).start();
+    }, [isFocusedSearch]);
+
+    const [searchText, setSearchText] = useState('');
+
+    const [dropDownHidden, setDropDownHidden] = useState(true)
+    const sliderHandler = () => {
+        setDropDownHidden(!dropDownHidden)
+    }
+
+    const [activeCategory, setActiveCategory] = useState('')
 
     return (
         <SafeAreaView style={styles.container}>
@@ -47,14 +78,48 @@ function HomeScreen() {
                         <View style={styles.alertBadge}><Text style={styles.bellText}>12</Text></View>
                     </View>
                 </View>
-                <View style={styles.searchContainer}></View>
+
+
+                <View style={styles.searchContainer}>
+                    <Animated.View style={[styles.searchInput, { width: searchWidth }]}>
+                        <Ionicons name="search-outline" size={24} color="#B6AE81FF" style={styles.searchIcon} />
+                        <TextInput
+                            style={styles.searchTextInput}
+                            placeholder={"Search.."}
+                            value={searchText}
+                            onChangeText={setSearchText}
+                            keyboardAppearance={"dark"}
+                            onFocus={handleFocusSearch}
+                            onBlur={handleBlurSearch}
+                        />
+                        <TouchableOpacity onPress={sliderHandler}>
+                            <Feather name="sliders" size={24} style={styles.sliderIcon} />
+                        </TouchableOpacity>
+                    </Animated.View>
+                </View>
+
+
+                <View style={styles.categoriesContainer}>
+                    {DummyCategories.DUMMY_CATEGORIES.map((category) => {
+                        const { name, logo } = category; // Destructure category object
+                        return (
+                            <CategoryMenuItem
+                                key={name} // Assuming name is unique, you can also use an ID if available
+                                name={name}
+                                logo={logo}
+                                activeCategory={activeCategory}
+                                setActiveCategory={setActiveCategory}
+                            />
+                        );
+                    })}
+                </View>
             </View>
 
 
             {/*<Text style={styles.text}>HomeScreen</Text>*/}
-            {/*<TouchableOpacity style={styles.button} onPress={handleLogout}>*/}
-            {/*    <Text style={styles.buttonText}>Logout</Text>*/}
-            {/*</TouchableOpacity>*/}
+            <TouchableOpacity style={styles.button} onPress={handleLogout}>
+                <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
             {/*<Separator />*/}
             {/*<TouchableOpacity style={styles.button} onPress={getUserInfo}>*/}
             {/*    <Text style={styles.buttonText}>UserInfo</Text>*/}
@@ -79,10 +144,65 @@ const styles = StyleSheet.create({
         minWidth: "100%",
         backgroundColor: Colors.colors.DARK_TWO
     },
+    categoriesContainer: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        marginTop: 20,
+    },
 
     headerContainer: {
         padding: 17,
         paddingTop: 10
+    },
+
+    searchIcon: {
+        color: Colors.colors.DEFAULT_GREEN1
+    },
+
+    sliderIcon: {
+        color: Colors.colors.DEFAULT_GREEN1
+    },
+
+    searchTextInputShadow: {
+        width: setWidth(85),
+        height: setHeight(4.8),
+        borderRadius: 8,
+        backgroundColor: Colors.colors.DEFAULT_WHITE,
+        shadowColor: "#151515",
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 0.5,
+        shadowRadius: 4,
+        elevation: 12,
+        justifyContent: "space-between",
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 10,
+        fontFamily: 'rubik-Regular',
+
+
+    },
+
+    searchInput: {
+        width: setWidth(79),
+        height: setHeight(4.8),
+        borderRadius: 8,
+        backgroundColor: Colors.colors.SECONDARY_WHITE,
+        overflow:"hidden",
+
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        flexDirection: "row"
+
+    },
+
+    searchTextInput: {
+        justifyContent: "center",
+        alignItems: "center",
+        fontFamily: 'rubik-Regular',
+        width: setWidth(55),
+        fontSize: 18,
+        marginLeft: 10
     },
 
     locationNotificationContainer: {
@@ -96,7 +216,10 @@ const styles = StyleSheet.create({
     },
 
     searchContainer: {
-
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 14
     },
     landMark: {
         color: 'white',
@@ -113,10 +236,10 @@ const styles = StyleSheet.create({
 
     headerCurvedContainer: {
         backgroundColor: Colors.colors.DEFAULT_GREEN,
-        height: "237%",
+        height: "239%",
         position: "absolute",
         top: "-209%",
-        minWidth: "485%",
+        minWidth: "495%",
         borderRadius: "1700%",
         alignSelf: "center",
         zIndex: -1,
@@ -150,6 +273,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#B6AE81FF',
         padding: 10,
         borderRadius: 5,
+        maxWidth: 140,
+        position: "absolute",
+        top: "50%",
+        left: "43%",
     },
     buttonText: {
         color: 'white',
