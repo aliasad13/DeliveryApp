@@ -144,6 +144,7 @@ return(
               <AntDesign name="user" size={24} color="#B6AE81FF" style={styles.userIcon}/>
               <TextInput style={styles.userNameTextInput}
                          placeholder={"Email/Username"}
+                         keyboardType={"email-address"}
                          keyboardAppearance={"dark"}
                          onFocus={handleFocusUser}
                          onBlur={handleBlurUser}

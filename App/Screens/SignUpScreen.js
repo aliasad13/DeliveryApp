@@ -120,6 +120,8 @@ function SignUpScreen({navigation}) {
                     onChangeText={(text) => {
                         setEmail(text);
                     }}
+                    keyboardType={"email-address"}
+
                     icon={<AntDesign name="mail" size={24} color="#B6AE81FF" />}
                 />
                 <Separator/>
