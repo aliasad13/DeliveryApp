@@ -1,7 +1,7 @@
 import WelcomeScreen from "../App/Screens/WelcomeScreen";
 import SignInScreen from "../App/Screens/SignInScreen";
 import SignUpScreen from "../App/Screens/SignUpScreen";
-import HomeScreen from "../App/Screens/HomeScreen";
+import BaseScreen from "../App/Screens/BaseScreen";
 import {NavigationContainer} from "@react-navigation/native";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {StyleSheet} from "react-native";
@@ -10,6 +10,12 @@ import { useSelector, useDispatch} from "react-redux";
 import {useEffect} from "react";
 import {appStart} from "../src/actions/GeneralAction";
 import * as SplashScreen from 'expo-splash-screen';
+import {Store} from "../src/Store";
+import CartScreen from "../App/Screens/CartScreen";
+import ProfileScreen from "../App/Screens/ProfileScreen";
+import TodayScreen from "../App/Screens/TodayScreen";
+import CategoriesScreen from "../App/Screens/CategoriesScreen";
+import HomeScreen from "../App/Screens/HomeScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +39,10 @@ function Navigators() {
         return null;
     }
 
+    const screen = () => Store?.getState()?.generalState?.screen;
+    console.log("==========================++++===+++=======> screen", screen() )
+
+
     return (
         <NavigationContainer>
             <Stack.Navigator
@@ -49,7 +59,7 @@ function Navigators() {
                         <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
                     </>
                 ) : (
-                    <Stack.Screen name="HomeScreen" component={HomeScreen} />
+                    <Stack.Screen name="BaseScreen" component={BaseScreen} />
                 )}
             </Stack.Navigator>
         </NavigationContainer>

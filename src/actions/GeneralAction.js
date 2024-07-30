@@ -15,7 +15,8 @@ const types = {
     REMOVE_FIRST_TIME_USE: 'REMOVE_FIRST_TIME_USE',
     SET_USER_DATA: 'SET_USER_DATA',
     SET_FONTS_LOADED: 'SET_FONTS_LOADED',
-    SET_FONT_ERROR: 'SET_FONT_ERROR'
+    SET_FONT_ERROR: 'SET_FONT_ERROR',
+    SET_SCREEN: 'SET_SCREEN'
 }
 
 const setIsAppLoading = (isAppLoading) => {
@@ -71,6 +72,14 @@ const setFontError = (fontError) => {
         payload: fontError
     };
 };
+
+const setScreen = (screen) => {
+    return {
+        type: types.SET_SCREEN,
+        payload: screen
+    };
+};
+
 
 async function refreshTokensUser() {
     try {
@@ -213,4 +222,4 @@ const appStart = () => {
 }
 
 
-export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken, removeIsFirstTimeUse, setFontsLoaded };
+export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken, removeIsFirstTimeUse, setFontsLoaded, setScreen };

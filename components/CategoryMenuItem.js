@@ -1,6 +1,8 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import CategoryImages from "../constants/CategoryImages";
 import {Colors} from "../constants/Colors";
+import {setScreen} from "../src/actions/GeneralAction";
+import {useDispatch} from "react-redux";
 
 
 function CategoryMenuItem({name, logo, activeCategory, setActiveCategory}) {
@@ -8,11 +10,19 @@ function CategoryMenuItem({name, logo, activeCategory, setActiveCategory}) {
         if (!string) return '';
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
-    console.log("==========================++++===+++=======>", CategoryImages[logo] )
-    console.log("==========================++++===+++=======>", setActiveCategory)
     const isActive = activeCategory === name;
+
+    const dispatch = useDispatch();
+    const handleScreenPress = () => {
+        const formattedName = name.toLowerCase().trim();
+        // name = '  Cart', formatted_name => name in state => "cart"
+        setActiveCategory(name);
+        dispatch(setScreen(formattedName));
+
+    };
+
     return(
-        <TouchableOpacity style={styles.category()} key={name} onPress={() => setActiveCategory(name)}>
+        <TouchableOpacity style={styles.category()} key={name} onPress={handleScreenPress}>
             <View style={styles.categoryIcon(activeCategory === name)}>
                 <Text>{CategoryImages[logo](isActive ? 40 : 28, isActive ? Colors.colors.DEFAULT_YELLOW : '#B6AE81FF')}</Text>
             </View>
@@ -44,10 +54,10 @@ const styles = StyleSheet.create({
 
     categoryIcon:(isActive) => ({
         marginTop: 5,
-        shadowColor: isActive ? "#f6cc6e" : 'none',
+        shadowColor: isActive ? Colors.colors.DEFAULT_YELLOW : 'none',
             shadowOffset: {width: 0, height: 0},
         shadowOpacity:  isActive ? 0.5 : 0,
-            shadowRadius: isActive ? 4 : 0,
+            shadowRadius: isActive ? 14 : 0,
     })
 
 
