@@ -1,10 +1,9 @@
 const DUMMY_CATEGORIES = [
-    {name: 'indian', logo: "INDIAN"},
-    {name: 'chinese', logo: "CHINESE"},
-    {name: 'arabic', logo: "ARABIC"},
-    {name: 'italian', logo: "ITALIAN"},
-    {name: 'bread', logo: "BREAD"},
-    {name: 'other', logo: "OTHER"},
+    {name: 'Home', logo: "HOME"},
+    {name: "Today", logo: "TODAY"},
+    {name: ' Categories', logo: "CATEGORIES"},
+    {name: '  Cart', logo: "CART"},
+    {name: ' Profile', logo: "USER"},
 ]
 
 export default {DUMMY_CATEGORIES}

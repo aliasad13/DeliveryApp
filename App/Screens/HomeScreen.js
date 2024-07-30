@@ -55,6 +55,7 @@ function HomeScreen() {
     }
 
     const [activeCategory, setActiveCategory] = useState('')
+//todays special, categories, home, profile
 
     return (
         <SafeAreaView style={styles.container}>
@@ -78,7 +79,6 @@ function HomeScreen() {
                         <View style={styles.alertBadge}><Text style={styles.bellText}>12</Text></View>
                     </View>
                 </View>
-
 
                 <View style={styles.searchContainer}>
                     <Animated.View style={[styles.searchInput, { width: searchWidth }]}>
