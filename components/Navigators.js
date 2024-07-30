@@ -11,11 +11,7 @@ import {useEffect} from "react";
 import {appStart} from "../src/actions/GeneralAction";
 import * as SplashScreen from 'expo-splash-screen';
 import {Store} from "../src/Store";
-import CartScreen from "../App/Screens/CartScreen";
-import ProfileScreen from "../App/Screens/ProfileScreen";
-import TodayScreen from "../App/Screens/TodayScreen";
-import CategoriesScreen from "../App/Screens/CategoriesScreen";
-import HomeScreen from "../App/Screens/HomeScreen";
+
 
 const Stack = createNativeStackNavigator();
 

@@ -1,6 +1,6 @@
 import {Text, View, TouchableOpacity, StyleSheet,} from 'react-native';
 
-function CategoriesScreen() {
+function CategoriesScreenComponent() {
     return(
         <View style={styles.container}>
             <Text>
@@ -10,7 +10,7 @@ function CategoriesScreen() {
     )
 }
 
-export default CategoriesScreen
+export default CategoriesScreenComponent
 
 const styles = StyleSheet.create({
     container: {

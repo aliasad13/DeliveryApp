@@ -1,16 +1,16 @@
 import {Text, View, TouchableOpacity, StyleSheet,} from 'react-native';
 
-function TodayScreen() {
+function HomeScreenComponent() {
     return(
         <View style={styles.container}>
             <Text>
-                TodayScreen
+                HomeScreen
             </Text>
         </View>
     )
 }
 
-export default TodayScreen
+export default HomeScreenComponent
 
 const styles = StyleSheet.create({
     container: {

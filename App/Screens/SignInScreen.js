@@ -26,7 +26,6 @@ import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import {login} from "../../utils/https";
 // import ResetPassword from "./ResetPassword";
-import HomeScreen from "./HomeScreen";
 import {connect, useDispatch, useSelector} from "react-redux";
 import {
     removeIsFirstTimeUse,

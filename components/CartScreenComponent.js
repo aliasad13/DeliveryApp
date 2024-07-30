@@ -1,6 +1,6 @@
 import {Text, View, TouchableOpacity, StyleSheet,} from 'react-native';
 
-function CartScreen() {
+function CartScreenComponent() {
     return(
         <View style={styles.container}>
             <Text>
@@ -10,7 +10,7 @@ function CartScreen() {
     )
 }
 
-export default CartScreen
+export default CartScreenComponent
 
 const styles = StyleSheet.create({
     container: {
