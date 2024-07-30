@@ -1,16 +1,16 @@
 import {Text, View, TouchableOpacity, StyleSheet,} from 'react-native';
 
-function ProfileScreen() {
+function TodayScreen() {
     return(
         <View style={styles.container}>
             <Text>
-                ProfileScreen
+                TodayScreen
             </Text>
         </View>
     )
 }
 
-export default ProfileScreen
+export default TodayScreen
 
 const styles = StyleSheet.create({
     container: {

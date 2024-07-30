@@ -2,9 +2,9 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import React from "react";
 
 export default {
-    HOME: (size, color) => <Ionicons name="home-outline" size={size} color={color} />,
     TODAY: (size, color) => <Ionicons name="fast-food-outline" size={size} color={color} />,
     CATEGORIES: (size, color) => <Entypo name="documents" size={size} color={color} />,
+    HOME: (size, color) => <Ionicons name="home-outline" size={size} color={color} />,
     CART: (size, color) => <AntDesign name="shoppingcart" size={size} color={color} />,
     USER: (size, color) => <AntDesign name="user" size={size} color={color} />
 };

@@ -54,7 +54,7 @@ function HomeScreen() {
         setDropDownHidden(!dropDownHidden)
     }
 
-    const [activeCategory, setActiveCategory] = useState('')
+    const [activeCategory, setActiveCategory] = useState('Home')
 //todays special, categories, home, profile
 
     return (
@@ -113,6 +113,8 @@ function HomeScreen() {
                         );
                     })}
                 </View>
+
+
             </View>
 
 

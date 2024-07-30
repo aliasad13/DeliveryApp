@@ -1,16 +1,16 @@
 import {Text, View, TouchableOpacity, StyleSheet,} from 'react-native';
 
-function ProfileScreen() {
+function CategoriesScreen() {
     return(
         <View style={styles.container}>
             <Text>
-                ProfileScreen
+                CategoriesScreen
             </Text>
         </View>
     )
 }
 
-export default ProfileScreen
+export default CategoriesScreen
 
 const styles = StyleSheet.create({
     container: {
