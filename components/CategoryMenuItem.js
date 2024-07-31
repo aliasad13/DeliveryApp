@@ -46,14 +46,14 @@ const styles = StyleSheet.create({
     categoryText: (isActive) => ({
         fontFamily: 'rubik-Regular',
         color: '#ffffff',
-        marginTop: 5,
+        marginTop: 3,
         opacity: isActive ? 1 : 0.8,
 
         elevation: 2,
     }),
 
     categoryIcon:(isActive) => ({
-        marginTop: 5,
+        marginTop: 0,
         shadowColor: isActive ? Colors.colors.DEFAULT_YELLOW : 'none',
             shadowOffset: {width: 0, height: 0},
         shadowOpacity:  isActive ? 0.5 : 0,

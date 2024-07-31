@@ -14,6 +14,10 @@ const HeaderComponent = () => {
     const dispatch = useDispatch();
     const [isFocusedSearch, setIsFocusedSearch] = useState(false);
     const searchWidth = useRef(new Animated.Value(setWidth(50))).current;
+    const searchContainerHeight = useRef(new Animated.Value(0)).current;
+    const searchInputPadding = useRef(new Animated.Value(0)).current;
+    const headerCurvedContainerHeight = useRef(new Animated.Value(setHeight(211.5))).current;
+
 
     const handleFocusSearch = () => {
         setIsFocusedSearch(true);
@@ -35,10 +39,30 @@ const HeaderComponent = () => {
     const sliderHandler = () => {
         setDropDownHidden(!dropDownHidden);
     };
+    const [showSearch, setShowSearch] = useState(false);
+
+    const toggleSearchContainer = () => {
+        setShowSearch(!showSearch);
+        Animated.timing(searchContainerHeight, {
+            toValue: showSearch ? 0 : setHeight(6), // Change setHeight(6) to desired height
+            duration: 400,
+            useNativeDriver: false,
+        }).start();
+        Animated.timing(searchInputPadding, {
+            toValue: showSearch ? 0 : 10, // Adjust padding value
+            duration: 400,
+            useNativeDriver: false,
+        }).start();
+        Animated.timing(headerCurvedContainerHeight, {
+            toValue: showSearch ? setHeight(211.5) : setHeight(217.5), // Adjust height value
+            duration: 400,
+            useNativeDriver: false,
+        }).start();
+    };
 
     return (
         <>
-            <View style={styles.headerCurvedContainer}></View>
+            <Animated.View style={[styles.headerCurvedContainer, { height: headerCurvedContainerHeight }]}></Animated.View>
             <View style={styles.headerContainer}>
                 <View style={styles.locationNotificationContainer}>
                     <View style={styles.locationContainer}>
@@ -46,14 +70,18 @@ const HeaderComponent = () => {
                         <Text style={styles.landMark}>Landmark,</Text>
                         <Text style={styles.town}>Town</Text>
                     </View>
+
                     <View style={styles.notificationContainer}>
+                        <TouchableOpacity style={styles.searchOpener} onPress={toggleSearchContainer}>
+                            <Ionicons name="search-outline" size={28} color="B6AE81FF" style={styles.bellIcon}/>
+                        </TouchableOpacity>
                         <Ionicons name="notifications-outline" size={28} color="B6AE81FF" style={styles.bellIcon}/>
                         <View style={styles.alertBadge}><Text style={styles.bellText}>12</Text></View>
                     </View>
                 </View>
 
-                <View style={styles.searchContainer}>
-                    <Animated.View style={[styles.searchInput, { width: searchWidth }]}>
+                <Animated.View style={[styles.searchContainer, { height: searchContainerHeight }]}>
+                    <Animated.View style={[styles.searchInput, { width: searchWidth, padding: searchInputPadding}]}>
                         <Ionicons name="search-outline" size={24} color="#B6AE81FF" style={styles.searchIcon} />
                         <TextInput
                             style={styles.searchTextInput}
@@ -68,7 +96,7 @@ const HeaderComponent = () => {
                             <Feather name="sliders" size={24} style={styles.sliderIcon} />
                         </TouchableOpacity>
                     </Animated.View>
-                </View>
+                </Animated.View>
 
                 <View style={styles.categoriesContainer}>
                     {DummyCategories.DUMMY_CATEGORIES.map((category) => {
@@ -98,6 +126,9 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.colors.SECONDARY_WHITE
     },
 
+    searchOpener: {
+        marginRight: 20
+    },
 
     containerDark: {
         flex: 1,
@@ -151,7 +182,6 @@ const styles = StyleSheet.create({
 
     searchInput: {
         width: setWidth(79),
-        height: setHeight(4.8),
         borderRadius: 8,
         backgroundColor: Colors.colors.SECONDARY_WHITE,
         overflow:"hidden",
@@ -203,7 +233,7 @@ const styles = StyleSheet.create({
 
     headerCurvedContainer: {
         backgroundColor: Colors.colors.DEFAULT_GREEN,
-        height: "239%",
+        height: setHeight(230),
         position: "absolute",
         top: "-209%",
         minWidth: "495%",

@@ -46,16 +46,11 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.colors.SECONDARY_WHITE,
         minWidth: '100%'
     },
-    scrollContainer: {
-        flexGrow: 1,
-    },
+
     screenComponents: {
         flex: 1,
         minWidth: '100%',
-        position: "absolute",
         backgroundColor: Colors.colors.SECONDARY_WHITE,
-        minHeight: "100%",
-        zIndex: 10,
-        marginTop: setHeight(10),
+        marginTop: setHeight(20),
     },
 });
