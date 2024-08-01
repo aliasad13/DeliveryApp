@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 0, height: 0},
         shadowOpacity: 0.5,
         shadowRadius: 4,
-        elevation: 2,
+        elevation: 12,
         alignItems: 'center',
         justifyContent: 'flex-start',
         borderRadius: 50,

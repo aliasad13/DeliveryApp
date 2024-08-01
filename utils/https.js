@@ -50,9 +50,11 @@ api.interceptors.response.use(
     }
 );
 
-export async function register(username, email, password, password_confirmation) {
+export async function register(firstName, lastName, username, email, password, password_confirmation) {
     try {
         const response = await api.post('/register', {
+            first_name: firstName,
+            last_name: lastName,
             email: email,
             password: password,
             password_confirmation: password_confirmation,

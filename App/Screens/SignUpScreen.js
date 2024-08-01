@@ -55,6 +55,8 @@ function SignUpScreen({navigation}) {
         setIsFocusedPassword(false);
     };
     const [username, setUsername] = useState('');
+    const [firstname, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -65,7 +67,7 @@ function SignUpScreen({navigation}) {
         setErrorMessages([]); // Clear previous error messages
         setErrorMessages([]);
         try {
-            const response = await register(username, email, password, confirmPassword);
+            const response = await register(firstname, lastName, username, email, password, confirmPassword);
 
             if (response){
                 StorageService.setUserAccessToken(response.accessToken).then(() => {
@@ -103,6 +105,25 @@ function SignUpScreen({navigation}) {
                 <Separator/>
                 <View style={styles.welcomeMessage}></View>
 
+                <StyledTextInput
+                    placeholder="FirstName"
+                    value={firstname}
+                    onChangeText={(text) => {
+                        setFirstName(text);
+                    }}
+                    icon={<AntDesign name="user" size={24} color="#B6AE81FF" />}
+                />
+                <Separator/>
+
+                <StyledTextInput
+                    placeholder="LastName"
+                    value={lastName}
+                    onChangeText={(text) => {
+                        setLastName(text);
+                    }}
+                    icon={<AntDesign name="user" size={24} color="#B6AE81FF" />}
+                />
+                <Separator/>
 
                 <StyledTextInput
                     placeholder="Username"

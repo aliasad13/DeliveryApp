@@ -126,6 +126,23 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.colors.SECONDARY_WHITE
     },
 
+    headerCurvedContainer: {
+        backgroundColor: Colors.colors.DEFAULT_GREEN,
+        height: setHeight(230),
+        position: "absolute",
+        top: "-209%",
+        minWidth: "495%",
+        borderRadius: "1700%",
+        alignSelf: "center",
+        zIndex: 10,
+        shadowColor: "#151515", // put the shadow same as the green at top or neon so it looks like the light bleeds into dark
+        shadowOffset: {width: 12, height: 6},
+        shadowOpacity: 0.5,
+        shadowRadius: 17,
+        elevation: 15,
+
+    },
+
     searchOpener: {
         marginRight: 20
     },
@@ -144,6 +161,7 @@ const styles = StyleSheet.create({
     headerContainer: {
         padding: 17,
         paddingTop: 10,
+        zIndex: 11
     },
 
 
@@ -231,22 +249,7 @@ const styles = StyleSheet.create({
 
     },
 
-    headerCurvedContainer: {
-        backgroundColor: Colors.colors.DEFAULT_GREEN,
-        height: setHeight(230),
-        position: "absolute",
-        top: "-209%",
-        minWidth: "495%",
-        borderRadius: "1700%",
-        alignSelf: "center",
-        zIndex: -1,
-        shadowColor: "#151515", // put the shadow same as the green at top or neon so it looks like the light bleeds into dark
-        shadowOffset: {width: 12, height: 6},
-        shadowOpacity: 0.5,
-        shadowRadius: 17,
-        elevation: 15,
 
-    },
 
     notificationContainer: {
         flexDirection: "row",

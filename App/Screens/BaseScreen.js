@@ -51,6 +51,6 @@ const styles = StyleSheet.create({
         flex: 1,
         minWidth: '100%',
         backgroundColor: Colors.colors.SECONDARY_WHITE,
-        marginTop: setHeight(20),
+        marginTop: setHeight(1),
     },
 });
