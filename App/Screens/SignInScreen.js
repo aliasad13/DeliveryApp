@@ -24,17 +24,19 @@ import {useState} from "react";
 import SignUpScreen from "./SignUpScreen";
 import { useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import {login} from "../../utils/https";
+import {getUserData, login} from "../../utils/https";
 // import ResetPassword from "./ResetPassword";
 import {connect, useDispatch, useSelector} from "react-redux";
 import {
     removeIsFirstTimeUse,
     setAccessToken,
     setIsFirstTimeUse,
-    setRefreshToken
+    setRefreshToken, setUserData
 } from '../../src/actions/GeneralAction';
 import StorageService from "../../services/StorageService";
-
+import {
+    fetchUserData
+} from '../../services/userService'
 
 
 function SignInScreen({navigation}) {
@@ -65,25 +67,34 @@ function SignInScreen({navigation}) {
             dispatch(removeIsFirstTimeUse())
         })
     }
-
     const handleLogin = async () => {
         setSignInClicked(true);
         setErrorMessages([]);
         try {
             const response = await login(email, password);
 
+
             if (response){
+
                 StorageService.setUserAccessToken(response.accessToken).then(() => {
                     dispatch(setAccessToken(response.accessToken))
-                });
+                })
+                //     .then((response) => {
+                //     // getUserData().then(() => {
+                //     //     dispatch(setUserData(response.user))
+                //     // })
+                // });
 
                 StorageService.setUserRefreshToken(response.refreshToken).then(() => {
                     dispatch(setRefreshToken(response.refreshToken))
                 });
+
+                const userDataResponse = await getUserData();
+                if(userDataResponse){
+                    dispatch(setUserData(userDataResponse));
+                }
             }
 
-            // Handle successful login (e.g., navigate to home screen)
-             // Adjust based on your navigation setup
         } catch (error) {
             console.error('Login failed:', error);
             setErrorMessages(Array.isArray(error) ? error : [error.toString()]);

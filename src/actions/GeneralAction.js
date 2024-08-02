@@ -73,6 +73,13 @@ const setFontError = (fontError) => {
     };
 };
 
+const setUserData = (data) => {
+    return {
+        type: types.SET_USER_DATA,
+        payload: data
+    };
+};
+
 const setScreen = (screen) => {
     return {
         type: types.SET_SCREEN,
@@ -185,10 +192,9 @@ const appStart = () => {
                         return;
                     }
                 }
-                console.log("Finally userData ", userData);
 
-                if (userData?.status) {
-                    console.log(userData);
+                if (userData) {
+                    console.log("Finally userData ==================================================>", userData);
                     dispatch({
                         type: types.SET_USER_DATA,
                         payload: userData
@@ -222,4 +228,4 @@ const appStart = () => {
 }
 
 
-export { setIsAppLoading, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken, removeIsFirstTimeUse, setFontsLoaded, setScreen };
+export { setIsAppLoading, setUserData, setAccessToken, setRefreshToken, types, appStart, setIsFirstTimeUse, removeToken, removeIsFirstTimeUse, setFontsLoaded, setScreen };

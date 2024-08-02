@@ -1,20 +1,55 @@
-import {Text, View, TouchableOpacity, StyleSheet, Image,} from 'react-native';
+import {Text, View, TouchableOpacity, StyleSheet, Image, ScrollView,} from 'react-native';
 import {Colors} from "../constants/Colors";
 import {setHeight, setWidth} from "../utils/Display";
 import {AntDesign, Feather} from "@expo/vector-icons";
+import {useDispatch, useSelector} from 'react-redux';
+import {getUserData} from "../utils/https";
+import FormattedDate from "./FormattedDate";
+import {set} from "lodash/object";
+import {removeUserToken} from "../services/StorageService";
+import {removeToken} from "../src/actions/GeneralAction";
 
 function ProfileScreenComponent() {
+
+    const dispatch = useDispatch()
+
+    const userData = useSelector(state => state.generalState.userData);
+    let userInfo;
+    if(userData){
+        userInfo = userData.user
+    }
+    const fullName = (firstName, lastName) => {
+        if(firstName && lastName){
+        return (firstName.slice(0,1).toUpperCase() + firstName.slice(1) + " " + lastName.slice(0,1).toUpperCase() + lastName.slice(1) )
+        }
+    }
+
+    const handleLogout = async () => {
+        try {
+            await removeUserToken();
+            dispatch(removeToken());
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
+
+    console.log("user===>", userData)
+    console.log("userInfo===>", userInfo)
     return(
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.profileContainer}>
                <View style={styles.primaryDetailsCard}>
                    <View style={styles.profilePicture}>
                        <Image source={require('../assets/images/profileAvatar.png')} style={styles.profilePictureImage}/>
                    </View>
                    <View style={styles.userDetails}>
+
+                       {/*frstname + lastname = fullname*/}
                        <View style={styles.fullNameContainer}>
-                           <Text style={styles.fullNameText}>Enzo Fernandez</Text>
+                           <Text style={styles.fullNameText}>{userInfo ? fullName(userInfo.first_name, userInfo.last_name) : ''}</Text>
                        </View>
+
+                       {/*username*/}
                        <View style={styles.detailsBelowFullNameContainer}>
                        <View style={styles.userNameContainer}>
                            <View style={styles.userNameLabel}>
@@ -24,9 +59,11 @@ function ProfileScreenComponent() {
                                <Text style={styles.gapText}></Text>
                            </View>
                            <View style={styles.userName}>
-                               <Text style={styles.userNameText}>enzof@32</Text>
+                               <Text style={styles.userNameText}>{userInfo ? userInfo.username : ''}</Text>
                            </View>
                        </View>
+
+                           {/*//email*/}
 
                        <View style={styles.userNameContainer}>
                            <View style={styles.userNameLabel}>
@@ -36,26 +73,39 @@ function ProfileScreenComponent() {
                                <Text style={styles.gapText}> </Text>
                            </View>
                            <View style={styles.userName}>
-                               <Text style={styles.userNameText}>aliasadmshah@gmail.com@32</Text>
+                               <Text style={styles.userNameText}>{userInfo ? userInfo.email : ''}</Text>
                            </View>
                        </View>
 
-                       <View style={styles.userNameContainer}>
-                           <View style={styles.userNameLabel}>
-                               <Text style={styles.userNameLabelText}><Feather name="phone" size={24} color="#B6AE81FF" /></Text>
+                           <View style={styles.userNameContainer}>
+                               <View style={styles.userNameLabel}>
+                                   <Text style={styles.userNameLabelText}><AntDesign name="calendar" size={24} color="#B6AE81FF" /></Text>
+                               </View>
+                               <View style={styles.gap}>
+                                   <Text style={styles.gapText}> </Text>
+                               </View>
+                               <View style={styles.userName}>
+                                   <Text style={styles.userNameText}>{userInfo ? <FormattedDate date={userInfo.created_at}/> : ''}</Text>
+                               </View>
                            </View>
-                           <View style={styles.gap}>
-                               <Text style={styles.gapText}></Text>
-                           </View>
-                           <View style={styles.userName}>
-                               <Text style={styles.userNameText}>9895054910</Text>
-                           </View>
-                       </View>
+
+                           {/*phone number can be added her but it will require the otp verification*/}
                        </View>
                    </View>
                </View>
             </View>
-        </View>
+            <View style={styles.touchables}>
+            <TouchableOpacity style={styles.touchable}>
+                <Text style={styles.touchableText}> Edit Profile </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.touchable}>
+                <Text style={styles.touchableText}> Admin Zone </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.touchable} onPress={handleLogout}>
+                <Text style={styles.touchableText}> Log Out </Text>
+            </TouchableOpacity>
+            </View>
+    </ScrollView>
     )
 }
 
@@ -69,6 +119,34 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.colors.LIGHT_GREY,
     },
 
+    touchables: {
+    },
+
+    touchableText: {
+        fontFamily: 'rubik-medium',
+        fontSize: 15
+    },
+
+    touchable: {
+        width: setWidth(88),
+        borderRadius: 10,
+        padding: 20,
+        backgroundColor: Colors.colors.SECONDARY_WHITE,
+        shadowColor: "#151515",
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 0.2,
+        shadowRadius: 18,
+        elevation: 12,
+        flexDirection: "column",
+        justifyContent: 'center',
+        alignItems: "center",
+        alignContent: "center",
+        position: "relative",
+        top: set(400),
+        marginBottom: 20
+
+    },
+
     detailsBelowFullNameContainer: {
 
     },
@@ -78,24 +156,22 @@ const styles = StyleSheet.create({
     },
 
     userDetails: {
-        flex: 1,
-        flexDirection: "column",
-        alignItems: "flex-start",
-        position: "relative",
-        bottom: setHeight(11),
+
+        bottom: setHeight(10),
         minWidth: setWidth(60),
-        marginLeft: "10%",
+        marginLeft: "5%",
         marginTop: "5%"
     },
 
     fullNameContainer: {
-        height: setHeight(3),
-        marginBottom: 10
+        height: setHeight(4),
+        marginBottom: 5,
+        marginTop: 15
     },
 
     fullNameText: {
         fontSize: 30,
-        fontFamily: 'rubik-medium'
+        fontFamily: 'rubik-bold'
 
     },
 
@@ -138,18 +214,18 @@ gap: {
 },
     profileContainer: {
         position: "absolute",
-        marginTop: setHeight(12),
+        marginTop: setHeight(15),
         justifyContent: 'center',
         alignItems: 'center',
-        alignContent: "center"
+        alignContent: "center",
     },
 
 
     primaryDetailsCard: {
         width: setWidth(88),
-        minHeight: setHeight(44),
         borderRadius: 18,
         padding: 20,
+        paddingBottom: 0,
         backgroundColor: Colors.colors.SECONDARY_WHITE,
         shadowColor: "#151515",
         shadowOffset: {width: 0, height: 0},
@@ -159,17 +235,18 @@ gap: {
         flexDirection: "column",
         justifyContent: 'flex-start',
         alignItems: "flex-start",
-        alignContent: "center"
+        alignContent: "center",
+        position: "relative",
 
     },
 
     profilePicture: {
-        height: '55%',
-        width: "60%",
+        height: '50%',
+        width: "30%",
         borderStyle: "solid",
 
         position: "relative",
-        top: -100,
+        top: -80,
         borderRadius: "100%",
         flexDirection: "column",
         justifyContent: "center",
