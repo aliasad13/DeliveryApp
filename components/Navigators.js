@@ -11,6 +11,7 @@ import {useEffect} from "react";
 import {appStart} from "../src/actions/GeneralAction";
 import * as SplashScreen from 'expo-splash-screen';
 import {Store} from "../src/Store";
+import EditProfileScreen from "../App/Screens/EditProfileScreen";
 
 
 const Stack = createNativeStackNavigator();
@@ -55,8 +56,11 @@ function Navigators() {
                         <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
                     </>
                 ) : (
+                    <>
                     <Stack.Screen name="BaseScreen" component={BaseScreen} />
-                )}
+                    <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+                    </>
+                    )}
             </Stack.Navigator>
         </NavigationContainer>
     )

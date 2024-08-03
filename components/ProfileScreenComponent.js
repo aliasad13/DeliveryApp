@@ -1,17 +1,20 @@
-import {Text, View, TouchableOpacity, StyleSheet, Image, ScrollView,} from 'react-native';
+import {Text, View, TouchableOpacity, StyleSheet, Image, ScrollView, Modal, TextInput, Button,} from 'react-native';
 import {Colors} from "../constants/Colors";
 import {setHeight, setWidth} from "../utils/Display";
-import {AntDesign, Feather} from "@expo/vector-icons";
+import {AntDesign, Entypo, Feather} from "@expo/vector-icons";
 import {useDispatch, useSelector} from 'react-redux';
 import {getUserData} from "../utils/https";
 import FormattedDate from "./FormattedDate";
 import {set} from "lodash/object";
 import {removeUserToken} from "../services/StorageService";
 import {removeToken} from "../src/actions/GeneralAction";
+import {useNavigation} from "@react-navigation/native";
+import EditProfileScreen from "../App/Screens/EditProfileScreen";
+import {useState} from "react";
 
 function ProfileScreenComponent() {
-
-    const dispatch = useDispatch()
+    const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const userData = useSelector(state => state.generalState.userData);
     let userInfo;
@@ -33,8 +36,20 @@ function ProfileScreenComponent() {
         }
     };
 
-    console.log("user===>", userData)
-    console.log("userInfo===>", userInfo)
+    const [modalVisible, setModalVisible] = useState(false);
+    const [newFirstName, setNewFirstName] = useState(userInfo ? userInfo.first_name : '');
+    const [newLastName, setNewLastName] = useState(userInfo ? userInfo.last_name : '');
+
+    const handleSave = () => {
+        
+        setModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        // Close the modal without saving
+        setModalVisible(false);
+    };
+
     return(
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.profileContainer}>
@@ -44,10 +59,41 @@ function ProfileScreenComponent() {
                    </View>
                    <View style={styles.userDetails}>
 
-                       {/*frstname + lastname = fullname*/}
                        <View style={styles.fullNameContainer}>
                            <Text style={styles.fullNameText}>{userInfo ? fullName(userInfo.first_name, userInfo.last_name) : ''}</Text>
+                           <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
+                               <Entypo name="edit" size={17} color="blue" />
+                           </TouchableOpacity>
                        </View>
+
+                       <Modal
+                           transparent={true}
+                           animationType="slide"
+                           visible={modalVisible}
+                           onRequestClose={() => setModalVisible(false)}
+                       >
+                           <View style={styles.modalContainer}>
+                               <View style={styles.modalContent}>
+                                   <Text style={styles.modalTitle}>Edit Name</Text>
+                                   <TextInput
+                                       style={styles.modalInput}
+                                       placeholder="First Name"
+                                       value={newFirstName}
+                                       onChangeText={setNewFirstName}
+                                   />
+                                   <TextInput
+                                       style={styles.modalInput}
+                                       placeholder="Last Name"
+                                       value={newLastName}
+                                       onChangeText={setNewLastName}
+                                   />
+                                   <View style={styles.modalButtons}>
+                                       <Button title="Cancel" onPress={handleCancel} />
+                                       <Button title="Save" onPress={handleSave} />
+                                   </View>
+                               </View>
+                           </View>
+                       </Modal>
 
                        {/*username*/}
                        <View style={styles.detailsBelowFullNameContainer}>
@@ -95,9 +141,7 @@ function ProfileScreenComponent() {
                </View>
             </View>
             <View style={styles.touchables}>
-            <TouchableOpacity style={styles.touchable}>
-                <Text style={styles.touchableText}> Edit Profile </Text>
-            </TouchableOpacity>
+
             <TouchableOpacity style={styles.touchable}>
                 <Text style={styles.touchableText}> Admin Zone </Text>
             </TouchableOpacity>
@@ -116,8 +160,40 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "flex-start",
-        backgroundColor: Colors.colors.LIGHT_GREY,
+        backgroundColor: Colors.colors.DARK_FIVE,
     },
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    },
+    modalContent: {
+        width: '80%',
+        padding: 20,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    modalInput: {
+        width: '100%',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+        marginBottom: 10,
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+
 
     touchables: {
     },
@@ -166,12 +242,19 @@ const styles = StyleSheet.create({
     fullNameContainer: {
         height: setHeight(4),
         marginBottom: 5,
-        marginTop: 15
+        marginTop: 15,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    editButton: {
+        marginLeft: 10
     },
 
     fullNameText: {
         fontSize: 30,
-        fontFamily: 'rubik-bold'
+        fontFamily: 'rubik-bold',
+
 
     },
 

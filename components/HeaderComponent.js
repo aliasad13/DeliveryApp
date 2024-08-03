@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     },
 
     headerCurvedContainer: {
-        backgroundColor: Colors.colors.DEFAULT_GREEN,
+        backgroundColor: Colors.colors.DEFAULT_GREEN1,
         height: setHeight(230),
         position: "absolute",
         top: "-209%",

@@ -180,8 +180,8 @@ const styles = StyleSheet.create({
 
 
     usernameInput: {
-        width: setWidth(70),
-        height: setHeight(4.5),
+        width: setWidth(80),
+        height: setHeight(6.4),
         borderRadius: 5,
         backgroundColor: Colors.colors.DEFAULT_WHITE,
 
@@ -189,24 +189,24 @@ const styles = StyleSheet.create({
         flexDirection: "row"
     },
     usernameInputShadow: {
-        width: setWidth(70),
-        height: setHeight(4.5),
+        width: setWidth(80),
+        height: setHeight(6.4),
         borderRadius: 5,
         backgroundColor: Colors.colors.DEFAULT_WHITE,
+
         shadowColor: "#151515",
         shadowOffset: {width: 0, height: 0},
         shadowOpacity: 0.5,
         shadowRadius: 4,
-        elevation: 2,
+        elevation: 12,
         justifyContent: "space-between",
         flexDirection: "row"
     },
     userNameTextInput: {
-        justifyContent: "center",
-        alignItems: "center",
+
         fontFamily: 'rubik-Regular',
-        width: setWidth(54),
-        borderWidth: 1,
+        color: "#7c7575",
+        width: setWidth(64),
         fontSize: 18
     },
 
