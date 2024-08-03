@@ -3,24 +3,28 @@ import {Colors} from "../constants/Colors";
 import {setHeight, setWidth} from "../utils/Display";
 import {AntDesign, Entypo, Feather} from "@expo/vector-icons";
 import {useDispatch, useSelector} from 'react-redux';
-import {getUserData} from "../utils/https";
+import {
+    changePassword,
+    getUserData,
+    sendMailVerificationOtp,
+    updateEmail,
+    updateFullName,
+    updateUsername
+} from "../utils/https";
 import FormattedDate from "./FormattedDate";
 import {set} from "lodash/object";
 import {removeUserToken} from "../services/StorageService";
-import {removeToken} from "../src/actions/GeneralAction";
+import {removeToken, setUserData} from "../src/actions/GeneralAction";
 import {useNavigation} from "@react-navigation/native";
 import EditProfileScreen from "../App/Screens/EditProfileScreen";
 import {useState} from "react";
+import Toast from 'react-native-root-toast';
 
 function ProfileScreenComponent() {
-    const navigation = useNavigation();
     const dispatch = useDispatch();
 
     const userData = useSelector(state => state.generalState.userData);
-    let userInfo;
-    if(userData){
-        userInfo = userData.user
-    }
+    const userInfo = userData?.user;
     const fullName = (firstName, lastName) => {
         if(firstName && lastName){
         return (firstName.slice(0,1).toUpperCase() + firstName.slice(1) + " " + lastName.slice(0,1).toUpperCase() + lastName.slice(1) )
@@ -39,14 +43,187 @@ function ProfileScreenComponent() {
     const [modalVisible, setModalVisible] = useState(false);
     const [newFirstName, setNewFirstName] = useState(userInfo ? userInfo.first_name : '');
     const [newLastName, setNewLastName] = useState(userInfo ? userInfo.last_name : '');
+    const [usernameModalVisible, setUsernameModalVisible] = useState(false);
+    const [newUsername, setNewUsername] = useState(userInfo ? userInfo.username : '');
+    const [emailModalVisible, setEmailModalVisible] = useState(false);
+    const [otpModalVisible, setOtpModalVisible] = useState(false);
+    const [newEmail, setNewEmail] = useState(userInfo ? userInfo.email : '');
+    const [otp, setOtp] = useState('');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordModalVisible, setPasswordModalVisible] = useState(false);
 
-    const handleSave = () => {
-        
+
+
+    const handleFullNameSave = async () => {
+
+        try {
+            const response = await updateFullName(userInfo.id, newFirstName, newLastName)
+            if (response) {
+                console.log(response)
+                dispatch(setUserData({
+                    ...userData,
+                    user: {
+                        ...userInfo,
+                        first_name: newFirstName,
+                        last_name: newLastName
+                    }
+                }))
+            }
+            Toast.show('Name has been updated successfully', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+            });
+        }catch (error) {
+            console.error('Error setting full name:', error);
+            Toast.show('Error updating name. Please try again.', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+                backgroundColor: 'red',
+            });
+        }
         setModalVisible(false);
+
+    };
+
+    const handleUsernameSave = async () => {
+        try {
+            const response = await updateUsername(userInfo.id, newUsername);
+            if (response) {
+                dispatch(setUserData({
+                    ...userData,
+                    user: {
+                        ...userInfo,
+                        username: newUsername
+                    }
+                }));
+                Toast.show('Username has been updated successfully', {
+                    duration: Toast.durations.LONG,
+                    position: Toast.positions.BOTTOM,
+                    shadow: true,
+                    animation: true,
+                    hideOnPress: true,
+                    delay: 0,
+                });
+            }
+        } catch (error) {
+            console.error('Error updating username:', error);
+            Toast.show('Error updating username. Please try again.', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+                backgroundColor: 'red',
+            });
+        }
+        setUsernameModalVisible(false);
+    };
+
+    const handleGetOtp = async () => {
+        try {
+            const response = await sendMailVerificationOtp(userInfo.id, newEmail);
+            if (response) {
+                Toast.show('OTP sent successfully', {
+                    duration: Toast.durations.LONG,
+                    position: Toast.positions.BOTTOM,
+                    shadow: true,
+                    animation: true,
+                    hideOnPress: true,
+                    delay: 0,
+                });
+                setEmailModalVisible(false);
+                setOtpModalVisible(true);
+            }
+        } catch (error) {
+            console.error('Error sending OTP:', error);
+            Toast.show('Error sending OTP. Please try again.', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+                backgroundColor: 'red',
+            });
+        }
+    };
+
+    const handleVerifyEmail = async () => {
+        try {
+            const response = await updateEmail(userInfo.id, newEmail, otp);
+            if (response) {
+                dispatch(setUserData({
+                    ...userData,
+                    user: {
+                        ...userInfo,
+                        email: newEmail
+                    }
+                }));
+                Toast.show('Email has been updated successfully', {
+                    duration: Toast.durations.LONG,
+                    position: Toast.positions.BOTTOM,
+                    shadow: true,
+                    animation: true,
+                    hideOnPress: true,
+                    delay: 0,
+                });
+                setOtpModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Error updating email:', error);
+            Toast.show('Error updating email. Please try again.', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+                backgroundColor: 'red',
+            });
+        }
+    };
+
+    const handleChangePassword = async () => {
+        if (newPassword !== confirmPassword) {
+            Toast.show('New password and confirm password do not match.', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                backgroundColor: 'red',
+            });
+            return;
+        }
+
+        try {
+            const response = await changePassword(userInfo.id, currentPassword, newPassword);
+            if (response) {
+                Toast.show('Password has been updated successfully', {
+                    duration: Toast.durations.LONG,
+                    position: Toast.positions.BOTTOM,
+                });
+                setPasswordModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Error updating password:', error);
+            Toast.show('Error updating password. Please try again.', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                backgroundColor: 'red',
+            });
+        }
     };
 
     const handleCancel = () => {
-        // Close the modal without saving
         setModalVisible(false);
     };
 
@@ -62,17 +239,17 @@ function ProfileScreenComponent() {
                        <View style={styles.fullNameContainer}>
                            <Text style={styles.fullNameText}>{userInfo ? fullName(userInfo.first_name, userInfo.last_name) : ''}</Text>
                            <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
-                               <Entypo name="edit" size={17} color="blue" />
+                               <Entypo name="edit" size={17} color="#4A61A8" />
                            </TouchableOpacity>
                        </View>
 
                        <Modal
                            transparent={true}
-                           animationType="slide"
+                           animationType="fade"
                            visible={modalVisible}
                            onRequestClose={() => setModalVisible(false)}
                        >
-                           <View style={styles.modalContainer}>
+                           <View style={styles.modalOverlay}>
                                <View style={styles.modalContent}>
                                    <Text style={styles.modalTitle}>Edit Name</Text>
                                    <TextInput
@@ -89,14 +266,16 @@ function ProfileScreenComponent() {
                                    />
                                    <View style={styles.modalButtons}>
                                        <Button title="Cancel" onPress={handleCancel} />
-                                       <Button title="Save" onPress={handleSave} />
+                                       <Button title="Save" onPress={handleFullNameSave} />
                                    </View>
                                </View>
                            </View>
                        </Modal>
 
-                       {/*username*/}
+
                        <View style={styles.detailsBelowFullNameContainer}>
+
+                       {/*username*/}
                        <View style={styles.userNameContainer}>
                            <View style={styles.userNameLabel}>
                                <Text style={styles.userNameLabelText}><AntDesign name="user" size={24} color="#B6AE81FF" style={styles.userIcon}/></Text>
@@ -107,7 +286,34 @@ function ProfileScreenComponent() {
                            <View style={styles.userName}>
                                <Text style={styles.userNameText}>{userInfo ? userInfo.username : ''}</Text>
                            </View>
+                           <TouchableOpacity style={styles.editButton} onPress={() => setUsernameModalVisible(true)}>
+                               <Entypo name="edit" size={17} color="#4A61A8" />
+                           </TouchableOpacity>
                        </View>
+
+                           <Modal
+                               transparent={true}
+                               animationType="fade"
+                               visible={usernameModalVisible}
+                               onRequestClose={() => setUsernameModalVisible(false)}
+                           >
+                               <View style={styles.modalOverlay}>
+                                   <View style={styles.modalContent}>
+                                       <Text style={styles.modalTitle}>Edit Username</Text>
+                                       <TextInput
+                                           style={styles.modalInput}
+                                           placeholder="Username"
+                                           value={newUsername}
+                                           onChangeText={setNewUsername}
+                                       />
+                                       <View style={styles.modalButtons}>
+                                           <Button title="Cancel" onPress={() => setUsernameModalVisible(false)} />
+                                           <Button title="Save" onPress={handleUsernameSave} />
+                                       </View>
+                                   </View>
+                               </View>
+                           </Modal>
+
 
                            {/*//email*/}
 
@@ -121,7 +327,59 @@ function ProfileScreenComponent() {
                            <View style={styles.userName}>
                                <Text style={styles.userNameText}>{userInfo ? userInfo.email : ''}</Text>
                            </View>
+                           <TouchableOpacity style={styles.editButton} onPress={() => setEmailModalVisible(true)}>
+                               <Entypo name="edit" size={17} color="#4A61A8" />
+                           </TouchableOpacity>
                        </View>
+                           <Modal
+                               transparent={true}
+                               visible={emailModalVisible}
+                               onRequestClose={() => setEmailModalVisible(false)}
+                           >
+                               <View style={styles.modalOverlay}>
+                                   <View style={styles.modalContent}>
+                                       <Text style={styles.modalTitle}>Edit Email</Text>
+                                       <TextInput
+                                           style={styles.modalInput}
+                                           placeholder="Email"
+                                           value={newEmail}
+                                           onChangeText={setNewEmail}
+                                           keyboardType="email-address"
+                                       />
+                                       <View style={styles.modalButtons}>
+                                           <Button title="Cancel" onPress={() => setEmailModalVisible(false)} />
+                                           <Button title="Get OTP" onPress={handleGetOtp} />
+                                       </View>
+                                   </View>
+                               </View>
+                           </Modal>
+
+                           <Modal
+                               transparent={true}
+                               visible={otpModalVisible}
+                               onRequestClose={() => setOtpModalVisible(false)}
+                           >
+                               <View style={styles.modalOverlay}>
+                                   <View style={styles.modalContent}>
+                                       <Text style={styles.modalTitle}>Verify Email</Text>
+                                       <TextInput
+                                           style={styles.modalInput}
+                                           placeholder="Enter OTP"
+                                           placeholderTextColor="#999"
+                                           value={otp}
+                                           onChangeText={setOtp}
+                                           keyboardType="numeric"
+                                       />
+                                       <View style={styles.modalButtons}>
+                                           <Button title="Cancel" onPress={() => setOtpModalVisible(false)} />
+                                           <Button title="Verify Email" onPress={handleVerifyEmail} />
+                                       </View>
+                                   </View>
+                               </View>
+                           </Modal>
+
+
+
 
                            <View style={styles.userNameContainer}>
                                <View style={styles.userNameLabel}>
@@ -142,6 +400,52 @@ function ProfileScreenComponent() {
             </View>
             <View style={styles.touchables}>
 
+                <View style={styles.passwordChangeContainer}>
+                    <TouchableOpacity onPress={() => setPasswordModalVisible(true)} style={styles.touchable}>
+                        <Text style={styles.touchableText}>Change Password</Text>
+                    </TouchableOpacity>
+
+                    <Modal
+                        transparent={true}
+                        animationType="fade"
+                        visible={passwordModalVisible}
+                        onRequestClose={() => setPasswordModalVisible(false)}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Change Password</Text>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="Current Password"
+                                    placeholderTextColor="#999"
+                                    secureTextEntry={true}
+                                    value={currentPassword}
+                                    onChangeText={setCurrentPassword}
+                                />
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="New Password"
+                                    placeholderTextColor="#999"
+                                    secureTextEntry={true}
+                                    value={newPassword}
+                                    onChangeText={setNewPassword}
+                                />
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="Confirm New Password"
+                                    placeholderTextColor="#999"
+                                    secureTextEntry={true}
+                                    value={confirmPassword}
+                                    onChangeText={setConfirmPassword}
+                                />
+                                <View style={styles.modalButtons}>
+                                    <Button title="Cancel" onPress={() => setPasswordModalVisible(false)} />
+                                    <Button title="Save" onPress={handleChangePassword} />
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+                </View>
             <TouchableOpacity style={styles.touchable}>
                 <Text style={styles.touchableText}> Admin Zone </Text>
             </TouchableOpacity>
@@ -163,39 +467,41 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.colors.DARK_FIVE,
     },
 
-    modalContainer: {
+
+
+    modalOverlay: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: '80%',
-        padding: 20,
         backgroundColor: 'white',
+        padding: 20,
         borderRadius: 10,
-        alignItems: 'center',
+        elevation: 5,
+        width: '80%',
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 15,
     },
     modalInput: {
-        width: '100%',
+        borderWidth: 1,
+        borderColor: '#ccc',
         padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        marginBottom: 10,
+        marginBottom: 15,
+        borderRadius: 5,
     },
     modalButtons: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        width: '100%',
     },
 
 
     touchables: {
+        position: "relative",
     },
 
     touchableText: {
@@ -218,9 +524,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         alignContent: "center",
         position: "relative",
-        top: set(400),
-        marginBottom: 20
-
     },
 
     detailsBelowFullNameContainer: {

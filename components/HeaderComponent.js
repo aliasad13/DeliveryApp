@@ -9,7 +9,7 @@ import DummyCategories from "../src/constants/DummyCategories";
 import CategoryMenuItem from "./CategoryMenuItem";
 
 const HeaderComponent = () => {
-    const [activeCategory, setActiveCategory] = useState('Home');
+    const [activeCategory, setActiveCategory] = useState('');
 
     const dispatch = useDispatch();
     const [isFocusedSearch, setIsFocusedSearch] = useState(false);

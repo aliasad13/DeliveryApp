@@ -99,6 +99,106 @@ export const getUserData = async () => {
         }
     }
 };
+
+export async function updateFullName(userId, firstName, lastName) {
+    try {
+        const response = await api.patch(`/users/${userId}/update_names`, {
+            user_id: userId,
+            first_name: firstName,
+            last_name: lastName,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Registration failed:', error.response?.data);
+        if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+            throw error.response.data.errors;
+        } else if (error.response?.data?.error) {
+            throw [error.response.data.error];
+        } else {
+            throw ['An unexpected error occurred'];
+        }
+    }
+}
+
+export async function updateUsername(userId, username) {
+    try {
+        const response = await api.patch(`/users/${userId}/update_names`, {
+            user_id: userId,
+            username: username
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Registration failed:', error.response?.data);
+        if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+            throw error.response.data.errors;
+        } else if (error.response?.data?.error) {
+            throw [error.response.data.error];
+        } else {
+            throw ['An unexpected error occurred'];
+        }
+    }
+}
+
+export async function sendMailVerificationOtp(userId, email) {
+    try {
+        const response = await api.post(`/users/${userId}/send_mail_verification_otp`, {
+            user_id: userId,
+            mail: email
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Registration failed:', error.response?.data);
+        if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+            throw error.response.data.errors;
+        } else if (error.response?.data?.error) {
+            throw [error.response.data.error];
+        } else {
+            throw ['An unexpected error occurred'];
+        }
+    }
+}
+
+export async function updateEmail(userId, newEmail, otp) {
+    try {
+        const response = await api.patch(`/users/${userId}/update_email`, {
+            user_id: userId,
+            new_email: newEmail,
+            otp: otp,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Registration failed:', error.response?.data);
+        if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+            throw error.response.data.errors;
+        } else if (error.response?.data?.error) {
+            throw [error.response.data.error];
+        } else {
+            throw ['An unexpected error occurred'];
+        }
+    }
+}
+
+export async function changePassword(userId, currentPassword, newPassword) {
+    try {
+        const response = await api.patch(`/users/${userId}/update_password`, {
+            user_id: userId,
+            current_password: currentPassword,
+            new_password: newPassword,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Registration failed:', error.response?.data);
+        if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+            throw error.response.data.errors;
+        } else if (error.response?.data?.error) {
+            throw [error.response.data.error];
+        } else {
+            throw ['An unexpected error occurred'];
+        }
+    }
+}
+
+
 // User Service
 
 
