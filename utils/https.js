@@ -198,6 +198,39 @@ export async function changePassword(userId, currentPassword, newPassword) {
     }
 }
 
+export async function updateUserProfilePic(userId, profileData) {
+    console.log("IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIi",profileData)
+    try {
+        const formData = new FormData();
+        if (profileData.profile_picture) {
+            formData.append('user[profile_picture_attributes][image]', {
+                uri: profileData.profile_picture.uri,
+                name: 'profile.jpg',
+                type: 'image/jpeg',
+            });
+        }
+
+        const response = await api.patch(`/users/${userId}/update_profile_picture`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('User update failed:', error.response?.data);
+        if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+            throw error.response.data.errors;
+        } else if (error.response?.data?.error) {
+            throw [error.response.data.error];
+        } else {
+            throw ['An unexpected error occurred'];
+        }
+    }
+}
+
+
+
 
 // User Service
 

@@ -1,4 +1,15 @@
-import {Text, View, TouchableOpacity, StyleSheet, Image, ScrollView, Modal, TextInput, Button,} from 'react-native';
+import {
+    Text,
+    View,
+    TouchableOpacity,
+    StyleSheet,
+    Image,
+    ScrollView,
+    Modal,
+    TextInput,
+    Button,
+    Alert, ActivityIndicator,
+} from 'react-native';
 import {Colors} from "../constants/Colors";
 import {setHeight, setWidth} from "../utils/Display";
 import {AntDesign, Entypo, Feather} from "@expo/vector-icons";
@@ -9,7 +20,7 @@ import {
     sendMailVerificationOtp,
     updateEmail,
     updateFullName,
-    updateUsername
+    updateUsername, updateUserProfile, updateUserProfilePic
 } from "../utils/https";
 import FormattedDate from "./FormattedDate";
 import {set} from "lodash/object";
@@ -17,10 +28,19 @@ import {removeUserToken} from "../services/StorageService";
 import {removeToken, setUserData} from "../src/actions/GeneralAction";
 import {useNavigation} from "@react-navigation/native";
 import EditProfileScreen from "../App/Screens/EditProfileScreen";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Toast from 'react-native-root-toast';
+import * as ImagePicker from 'expo-image-picker';
+import { Platform } from 'react-native';
+import AWS from 'aws-sdk';
+import FastImage from 'react-native-fast-image';
+import ImageResizer from 'react-native-image-resizer';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
+import * as Asset from 'expo-asset';
 
 function ProfileScreenComponent() {
+
     const dispatch = useDispatch();
 
     const userData = useSelector(state => state.generalState.userData);
@@ -53,9 +73,14 @@ function ProfileScreenComponent() {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [profileImage, setProfileImage] = useState(userInfo?.profile_picture || require('../assets/images/profileAvatar.png'));
+    const [loading, setLoading] = useState(false);
+    const [cachedImage, setCachedImage] = useState(null);
 
-
-
+console.log(userInfo)
     const handleFullNameSave = async () => {
 
         try {
@@ -223,17 +248,155 @@ function ProfileScreenComponent() {
         }
     };
 
+
+    const pickImage = async () => {
+        if (Platform.OS !== 'web') {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                alert('Sorry, we need camera roll permissions to make this work!');
+                return;
+            }
+        }
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const compressedImage = await manipulateAsync(
+                result.assets[0].uri,
+                [{ resize: { width: 800, height: 800 } }],
+                { compress: 0.5, format: SaveFormat.JPEG }
+            );
+
+            // Show confirmation dialog
+            Alert.alert(
+                "Upload Profile Picture",
+                "Are you sure you want to upload this image as your profile picture?",
+                [
+                    {
+                        text: "Cancel",
+                        style: "cancel"
+                    },
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            setProfileImage({ uri: compressedImage.uri });
+                            uploadProfilePicture(compressedImage.uri);
+                        }
+                    }
+                ]
+            );
+        }
+    };
+
+    AWS.config.update({
+        accessKeyId: 'AKIA2UC3FMEYFQ7HZAH2',
+        secretAccessKey: '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',
+        region: 'eu-north-1'
+    });
+    const s3 = new AWS.S3();
+
+    const uploadProfilePicture = async (imageUri) => {
+        setLoading(true);
+        try {
+            const response = await fetch(imageUri);
+            const blob = await response.blob();
+
+            const fileName = `profile-${Date.now()}.jpg`;
+
+            const params = {
+                Bucket: 'blue.bucket',
+                Key: fileName,
+                Body: blob,
+                ContentType: 'image/jpeg'};
+
+            const uploadResult = await s3.upload(params).promise();
+            const newImageUrl = uploadResult.Location;
+
+            const data = await updateUserProfilePic(userInfo.id, { profile_picture: { uri: newImageUrl } });
+            dispatch(setUserData({
+                ...userData,
+                user: {
+                    ...userInfo,
+                    profile_picture: newImageUrl
+                }
+            }));
+            cacheImage(newImageUrl);
+
+            setProfileImage({ uri: newImageUrl });
+
+            Toast.show('Profile picture updated successfully', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            setLoading(false);
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            Toast.show('Error updating profile picture. Please try again.', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+                backgroundColor: 'red',
+            });
+            setLoading(false);
+        }
+    };
+
     const handleCancel = () => {
         setModalVisible(false);
     };
+
+    useEffect(() => {
+        if (typeof profileImage === 'string') {
+            cacheImage(profileImage);
+        }
+    }, [profileImage]);
+
+    const cacheImage = async (uri) => {
+        try {
+            const cacheDir = FileSystem.cacheDirectory;
+            const fileName = uri.split('/').pop();
+            const fileUri = `${cacheDir}${fileName}`;
+
+            const imageExists = await FileSystem.getInfoAsync(fileUri);
+
+            if (!imageExists.exists) {
+                await FileSystem.downloadAsync(uri, fileUri);
+            }
+
+            setCachedImage(fileUri);
+        } catch (error) {
+            console.error('Error caching image:', error);
+        }
+    };
+
+
 
     return(
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.profileContainer}>
                <View style={styles.primaryDetailsCard}>
+                   <TouchableOpacity style={styles.editButtonProfilePic} onPress={pickImage}>
+                       <Entypo name="edit" size={17} color="#4A61A8" />
+                   </TouchableOpacity>
                    <View style={styles.profilePicture}>
-                       <Image source={require('../assets/images/profileAvatar.png')} style={styles.profilePictureImage}/>
+
+                       <Image
+                           style={styles.profilePictureImage}
+                           source={{
+                               uri: cachedImage || profileImage.uri || profileImage,
+                           }}
+                           onLoadStart={() => setLoading(true)}
+                           onLoadEnd={() => setLoading(false)}
+                           onError={(e) => {
+                           }}
+                       />
+
                    </View>
+                   {loading && <ActivityIndicator size="large" color="#0000ff" />}
                    <View style={styles.userDetails}>
 
                        <View style={styles.fullNameContainer}>
@@ -271,7 +434,6 @@ function ProfileScreenComponent() {
                                </View>
                            </View>
                        </Modal>
-
 
                        <View style={styles.detailsBelowFullNameContainer}>
 
@@ -414,30 +576,71 @@ function ProfileScreenComponent() {
                         <View style={styles.modalOverlay}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Change Password</Text>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Current Password"
-                                    placeholderTextColor="#999"
-                                    secureTextEntry={true}
-                                    value={currentPassword}
-                                    onChangeText={setCurrentPassword}
-                                />
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="New Password"
-                                    placeholderTextColor="#999"
-                                    secureTextEntry={true}
-                                    value={newPassword}
-                                    onChangeText={setNewPassword}
-                                />
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Confirm New Password"
-                                    placeholderTextColor="#999"
-                                    secureTextEntry={true}
-                                    value={confirmPassword}
-                                    onChangeText={setConfirmPassword}
-                                />
+                                <View style={styles.passwordInputContainer}>
+                                    <TextInput
+                                        style={styles.passwordInput}
+                                        placeholder="Current Password"
+                                        placeholderTextColor="#999"
+                                        secureTextEntry={!showCurrentPassword}
+                                        value={currentPassword}
+                                        onChangeText={setCurrentPassword}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.eyeButton}
+                                        onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                                    >
+                                        <Feather
+                                            name={showCurrentPassword ? "eye" : "eye-off"}
+                                            size={24}
+                                            color="#4A61A8"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View style={styles.passwordInputContainer}>
+                                    <TextInput
+                                        style={styles.passwordInput}
+                                        placeholder="New Password"
+                                        placeholderTextColor="#999"
+                                        secureTextEntry={!showNewPassword}
+                                        value={newPassword}
+                                        onChangeText={setNewPassword}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.eyeButton}
+                                        onPress={() => setShowNewPassword(!showNewPassword)}
+                                    >
+                                        <Feather
+                                            name={showNewPassword ? "eye" : "eye-off"}
+                                            size={24}
+                                            color="#4A61A8"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+
+
+                                <View style={styles.passwordInputContainer}>
+                                    <TextInput
+                                        style={styles.passwordInput}
+                                        placeholder="Confirm New Password"
+                                        placeholderTextColor="#999"
+                                        secureTextEntry={!showConfirmPassword}
+                                        value={confirmPassword}
+                                        onChangeText={setConfirmPassword}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.eyeButton}
+                                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    >
+                                        <Feather
+                                            name={showConfirmPassword ? "eye" : "eye-off"}
+                                            size={24}
+                                            color="#4A61A8"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+
+
                                 <View style={styles.modalButtons}>
                                     <Button title="Cancel" onPress={() => setPasswordModalVisible(false)} />
                                     <Button title="Save" onPress={handleChangePassword} />
@@ -467,6 +670,36 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.colors.DARK_FIVE,
     },
 
+
+    editButtonProfilePic: {
+        position: 'absolute',
+        left: '30%',
+        zIndex:50,
+        top: '13%',
+        backgroundColor: 'white',
+        borderRadius: 15,
+        padding: 5,
+        shadowColor: "#151515",
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 0.2,
+        shadowRadius: 18,
+    },
+
+    passwordInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        marginBottom: 15,
+    },
+    passwordInput: {
+        flex: 1,
+        padding: 10,
+    },
+    eyeButton: {
+        padding: 10,
+    },
 
 
     modalOverlay: {
@@ -502,6 +735,7 @@ const styles = StyleSheet.create({
 
     touchables: {
         position: "relative",
+        bottom: setHeight(7)
     },
 
     touchableText: {
@@ -524,6 +758,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         alignContent: "center",
         position: "relative",
+        marginBottom: 10
     },
 
     detailsBelowFullNameContainer: {
@@ -599,15 +834,15 @@ const styles = StyleSheet.create({
 gap: {
 },
     profileContainer: {
-        position: "absolute",
-        marginTop: setHeight(15),
         justifyContent: 'center',
         alignItems: 'center',
         alignContent: "center",
+        height: setHeight(50)
     },
 
 
     primaryDetailsCard: {
+        height: setHeight(30),
         width: setWidth(88),
         borderRadius: 18,
         padding: 20,
@@ -618,23 +853,20 @@ gap: {
         shadowOpacity: 0.2,
         shadowRadius: 18,
         elevation: 12,
-        flexDirection: "column",
-        justifyContent: 'flex-start',
-        alignItems: "flex-start",
-        alignContent: "center",
-        position: "relative",
+
 
     },
 
     profilePicture: {
-        height: '50%',
-        width: "30%",
+        height: '45%',
+        width: "33%",
         borderStyle: "solid",
+        overflow: "hidden",
 
         position: "relative",
         top: -80,
         borderRadius: "100%",
-        flexDirection: "column",
+        flexDirection: "row",
         justifyContent: "center",
         alignContent: "center",
         alignItems:"center",
@@ -643,6 +875,7 @@ gap: {
         shadowOpacity: .5,
         shadowRadius: 5,
         elevation: 12,
+
     },
 
     profilePictureImage: {
@@ -650,6 +883,7 @@ gap: {
         height: '95%',
         resizeMode: 'contain',
         borderRadius: "100%",
+        overflow: "hidden"
     },
 
 
