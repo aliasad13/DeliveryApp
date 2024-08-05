@@ -203,9 +203,10 @@ export async function updateUserProfilePic(userId, profileData) {
     try {
         const formData = new FormData();
         if (profileData.profile_picture) {
+            const fileName = `profile_${Date.now()}.jpg`;
             formData.append('user[profile_picture_attributes][image]', {
                 uri: profileData.profile_picture.uri,
-                name: 'profile.jpg',
+                name: fileName,
                 type: 'image/jpeg',
             });
         }

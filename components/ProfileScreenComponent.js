@@ -80,13 +80,11 @@ function ProfileScreenComponent() {
     const [loading, setLoading] = useState(false);
     const [cachedImage, setCachedImage] = useState(null);
 
-console.log(userInfo)
     const handleFullNameSave = async () => {
 
         try {
             const response = await updateFullName(userInfo.id, newFirstName, newLastName)
             if (response) {
-                console.log(response)
                 dispatch(setUserData({
                     ...userData,
                     user: {
@@ -351,6 +349,7 @@ console.log(userInfo)
 
     useEffect(() => {
         if (typeof profileImage === 'string') {
+            setProfileImage({ uri: userInfo?.profile_picture })
             cacheImage(profileImage);
         }
     }, [profileImage]);
