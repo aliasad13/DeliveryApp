@@ -38,6 +38,8 @@ import ImageResizer from 'react-native-image-resizer';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
 import * as Asset from 'expo-asset';
+import { AWS_CONFIG, S3_BUCKET } from '../creds'
+
 
 function ProfileScreenComponent() {
 
@@ -291,11 +293,7 @@ function ProfileScreenComponent() {
         }
     };
 
-    AWS.config.update({
-        accessKeyId: 'AKIA2UC3FMEYFQ7HZAH2',
-        secretAccessKey: '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',
-        region: 'eu-north-1'
-    });
+    AWS.config.update(AWS_CONFIG);
     const s3 = new AWS.S3();
 
     const uploadProfilePicture = async (imageUri) => {
